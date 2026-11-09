@@ -1,0 +1,9 @@
+build/
+.tools/
+__pycache__/
+*.pyc
+.venv/
+tests/fuzz/crash-*
+tests/fuzz/leak-*
+tests/fuzz/timeout-*
+bench/results/**/*.tmp

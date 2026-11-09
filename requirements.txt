@@ -1,0 +1,10 @@
+# Robot Framework stack matches renode/renode v1.17.0 tests/requirements.txt
+robotframework==6.1
+robotframework-retryfailed==0.2.0
+psutil==5.9.4
+pyyaml==6.0.2
+telnetlib3==2.0.4
+# coverage reports
+gcovr==8.3
+# hardware link only (HIL / live demo over serial)
+pyserial==3.5

@@ -1,0 +1,16 @@
+{
+  "version": 6,
+  "configurePresets": [
+    { "name": "base", "hidden": true, "generator": "Ninja", "binaryDir": "${sourceDir}/build/${presetName}" },
+    { "name": "fw-debug", "inherits": "base", "toolchainFile": "${sourceDir}/cmake/arm-none-eabi.cmake",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug", "FAULT_INJECTION": "ON" } },
+    { "name": "fw-release", "inherits": "base", "toolchainFile": "${sourceDir}/cmake/arm-none-eabi.cmake",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release", "FAULT_INJECTION": "OFF" } },
+    { "name": "host", "inherits": "base",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug", "SANITIZE": "address,undefined", "COVERAGE": "ON" } },
+    { "name": "host-tsan", "inherits": "base",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "RelWithDebInfo", "SANITIZE": "thread" } },
+    { "name": "host-fuzz", "inherits": "base",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "RelWithDebInfo", "FUZZ": "ON", "SANITIZE": "address,undefined" } }
+  ]
+}
