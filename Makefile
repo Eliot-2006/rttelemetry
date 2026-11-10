@@ -6,7 +6,7 @@ FUZZ_CC ?= $(firstword $(wildcard /opt/homebrew/opt/llvm/bin/clang) clang)
 FUZZ_SECONDS ?= 60
 JOBS ?= $(shell getconf _NPROCESSORS_ONLN)
 
-.PHONY: bootstrap fw fw-release test-host test-tsan fuzz test-py test-platform test clean
+.PHONY: bootstrap fw fw-release test-host test-tsan fuzz test-py test-platform test coverage clean
 
 bootstrap:
 	TOOLS_DIR=$(TOOLS_DIR) scripts/bootstrap.sh
@@ -37,6 +37,20 @@ test-platform: fw
 	mkdir -p build/robot/platform && $(ENV) && cd build/robot/platform && "$$RENODE_TEST" $(CURDIR)/tests/platform/gates.robot
 
 test: test-host test-tsan test-py
+
+# src/core coverage (PRD §19.2 gate: >= 90 % lines, >= 80 % branches). Measured on a separate
+# sanitizer-free build: ASan/UBSan checks show up as extra (never-taken) gcov branches.
+# gcov flavour follows the C compiler (CC); override with GCOV=...
+coverage:
+	cmake -S . -B build/host-cov -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCOVERAGE=ON >/dev/null && cmake --build build/host-cov -j$(JOBS)
+	find build/host-cov -name '*.gcda' -delete
+	ctest --test-dir build/host-cov --output-on-failure -LE stress
+	$(ENV) && cc=$$(sed -n 's/^CMAKE_C_COMPILER:FILEPATH=//p' build/host-cov/CMakeCache.txt); \
+	case "$$cc" in *clang*) d=$$(dirname "$$cc"); g="$$d/llvm-cov gcov"; [ -x "$$d/llvm-cov" ] || g="xcrun llvm-cov gcov";; \
+	  *) g=gcov; command -v gcov >/dev/null || g="xcrun llvm-cov gcov";; esac; \
+	mkdir -p build/host/coverage && gcovr -r . --filter 'src/core/' build/host-cov \
+	  --gcov-executable "$${GCOV:-$$g}" --html-details build/host/coverage/index.html \
+	  --txt build/host/coverage/coverage.txt --fail-under-line 90 --fail-under-branch 80 --print-summary
 
 clean:
 	cmake -E rm -rf build
