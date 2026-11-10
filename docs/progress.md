@@ -11,11 +11,21 @@ hardware measurement.
 | M2 RTOS firmware skeleton (tasks, HEALTH, BOOT, watchdog supervisor) | Done | `tests/robot/telemetry.robot` IT-BOOT-1, IT-HEALTH-1 (G3: HEALTH spacing 1 000 000 µs ± 1 ms) |
 | M3 acquisition, processing, commands, loss accounting | Done | IT-ACQ-1/2/3, IT-CMD-1, IT-ACCT-1, FI-03, FI-04 |
 | M4/M5 fault injection and recovery | Done | `tests/robot/fault.robot`: FI-01, 02, 05, 06, 07, 08, 09, 10, IT-STRESS-1 (60 s virtual at 8 kHz, no reset, exact conservation, stacks ≥ 25 %), IT-RELEASE-1; IT-GOLD-1 (3 runs + golden identical, also across Renode processes) |
-| M6 benchmarks | Done for [EMU]/[HOST]/[BUILD] | `bench/bench.py`, `bench/report.py` → `docs/results.md`. B-03 and B-06 need hardware |
+| M6 benchmarks | Done for [EMU]/[HOST]/[BUILD] | `bench/bench.py` (B-01, 02, 04, 05, 07, 08, 09, plus B-10 overflow, B-11 recovery for P-13/P-14, B-12 demo timeline); `make results` → `docs/results.md` and the `docs/img` charts. B-03 and B-06 need hardware. Repeatability: see below |
 | M7 IMU (P1) | Done (polled, D11) | IT-IMU-1 (200 Hz, values exact at ±4 g / 500 dps), FI-12 (2 NACKs absorbed by retries; 3 → OFFLINE, bus recovery, re-probe after 1 s, ADC path 0 drops). FI-13 is **not applicable**: the polled design has no DRDY to lose, and Renode 1.17.0 models neither DRDY nor `STATUS_REG` |
 | M8 response-time analysis | Tool done; inputs are placeholders | `tools/rta.py`, `docs/scheduling.md`. The task set matches the as-built polled IMU. WCETs need silicon (DWT): Renode is not cycle-accurate |
 | M9 hardware-in-the-loop | **Not possible: no hardware** | |
-| M10 docs + demo | Done (no video, no tag) | README, `docs/design.md`, `docs/testing.md`, `docs/hardware.md`, `make demo`. A demo video and the `v1.0.0` tag are left to the maintainer |
+| M10 docs + demo | Done (no video, no tag) | README with architecture diagram and charts, `docs/design.md`, `docs/testing.md`, `docs/hardware.md`, `make demo` (recorded transcript: `docs/img/demo.svg`, `make demo-svg`). A demo video and the `v1.0.0` tag are left to the maintainer |
+
+## Repeatability (M6 acceptance, P-16)
+
+- **P-16:** `make test-renode` (platform gates + 24 Robot tests) ran 20 times back to back at 343533e
+  on macOS arm64: 20/20 passed, 0 failures, 145–158 s wall time per run (limit 10 min). Since then,
+  only `tools/telemetry/demo.py` changed, which the suites do not use.
+- **Second benchmark run:** after the full run at 40008df3 was committed, `bench.py --only
+  B-01,B-05,B-09,B-10,B-11,B-12` ran again (which also reruns B-02, B-04 and B-08). Every value in
+  all nine result files matched exactly (only commit/provenance fields differ). The duplicate
+  files were not kept.
 
 ## Divergences found after M0 (continuing D10–D13 in `docs/platform-verification.md`)
 
@@ -23,6 +33,7 @@ hardware measurement.
 |---|---|---|
 | D14 | `STM32DMA`: a stream's `EN` bit stays set after transfer complete (silicon clears it in hardware). Seen as `S6CR = 0x451` after the first UART TX. The second `uart_tx_dma_start()` saw `EN` and refused, so `configASSERT` fired and the firmware reboot-looped | The TX TC handler clears `EN` itself. That is a no-op on silicon. Found by the BOOT frame's crash record (`ASSERT`, `telemetry.c:81`, task `tx`) on the first emulated boot |
 | D15 | `STM32_Timer` raises the update event every `ARR` ticks (silicon: `ARR + 1`). TIM3 at 1 kHz (`ARR = 999`) gives a sample period of exactly **999 µs**, and 100 Hz gives 9999 µs. TIM2 is unaffected (G2) | The firmware keeps the silicon-correct `ARR = 10⁶/fs − 1`. The Robot suites expect `period − 1` through `${TIM_DT_OFFSET}` in `tests/robot/common.resource` |
+| D16 | A reset that lands mid-scan leaves hidden ADC-to-DMA request state in Renode: the first scan after boot stops after one transfer | TIM3 aborts a scan still in flight after 2 ms (`adc_abort_stalled_scan`); regression test FI-06b. See the bug entry below |
 
 ## Bugs found by integration tests
 

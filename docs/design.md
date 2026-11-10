@@ -54,7 +54,7 @@ All kernel objects and stacks are static (`configSUPPORT_DYNAMIC_ALLOCATION 0`).
 
 | Region | Contents | Notes |
 |---|---|---|
-| FLASH | code, rodata, `.data` init | 23 KB release, 31 KB debug (`make size-check`) |
+| FLASH | code, rodata, `.data` init | 26 KB release, 35 KB debug of the 64 KiB budget (`make size-check`) |
 | SRAM1/2 | `.data`, `.bss` (TCBs, ring, pool, `scan_buf`, `tx_wire`), `.noinit` reset record | Every DMA buffer is here. `DMA_ADDR_OK()` asserts it at init (D4) |
 | CCM | `.msp` (2 KiB MSP stack at the bottom: an overflow faults instead of corrupting), task stacks | No DMA on silicon |
 

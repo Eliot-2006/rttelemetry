@@ -14,7 +14,8 @@ make fuzz             # libFuzzer, 60 s per target (FUZZ_SECONDS=...)
 make fw fw-release size-check static-analysis   # firmware builds, memory budgets, no heap, cppcheck
 make test-renode      # platform gates + every tests/robot/*.robot suite on Renode
 make demo             # scripted end-to-end demo with a live dashboard (~35 s)
-make bench-emu soak   # benchmarks -> bench/results, docs/results.md
+make bench-emu soak   # benchmarks -> bench/results (bench-all: every bench, ~45 min)
+make results          # docs/results.md and the docs/img charts from bench/results (no Renode)
 make ci-docker        # the Linux CI path in ubuntu:24.04 via Docker
 ```
 
@@ -67,6 +68,10 @@ Python oracle, sample by sample.
 | FI-13 | IMU data stops | **not applicable**: polled design (D11), no DRDY to lose |
 | IT-STRESS-1 | 8 kHz + repeated stalls + slow link + uplink spam, 60 s virtual: no reset, exact conservation, every stack ≥ 25 % free | pass |
 | IT-RELEASE-1 | Release build: FI_ARM → UNSUPPORTED, BOOT shows release and no fault injection | pass |
+
+## Repeatability
+
+The Renode suite passed 20 of 20 consecutive runs (P-16), and a second benchmark run reproduced every `[EMU]` value exactly. Details in `docs/progress.md`.
 
 ## Emulator caveats that shape the tests
 
