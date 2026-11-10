@@ -39,6 +39,7 @@ hardware measurement.
 - LSM6DSO: the `Default*` properties are not returned by reads. Values come from `FeedAccelerationSample` / `FeedAngularRateSample` (with a repeat count). The model honors FS_XL/FS_G: 0.5 g at ±4 g reads 4096 LSB, and 250 dps at 500 dps reads 14286 LSB. `BDU` is an unhandled tag.
 
 - The USART2 model delivers RX bytes at a finite rate that is not tied to the baud rate. FI-05 paces oversize frames at 50 ms each so the backlog drains before the final PING.
+- Renode 1.17.0 started with `--console` and stdin at EOF crashes after about 12 min of wall time (`SemaphoreFullException` in `ConsoleIOSource`, exit −6). This killed the first soak runs. `bench/bench.py` now starts Renode with `--disable-gui -P -1`, so it does not read stdin, and the 30 min soak passes.
 - A Renode IWDG/software reset reloads the ELF through the `reset` macro (FI-06/07/08/09 rely on this). The fault tests check only the BOOT record and that sampling resumes, not the ADC values after a reset.
 
 ## Decisions

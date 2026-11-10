@@ -97,7 +97,8 @@ def b07(d):
                 ["Decoder rejects (CRC/COBS)", f"{sum(d['rejects'].values())} {L}"],
                 ["Drops (overrun / ring / pool)", f"{d['dropped_overrun']} / {d['dropped_ring']} / {d['dropped_txpool']} {L}"],
                 ["Conservation exact", "yes" if d["conservation"]["ok"] else "**NO**"],
-                ["Min task stack free (words)", f"{d['stack_free_min_words']} {L}"]])
+                ["Min task stack free (words)", ", ".join(f"{t} {w}" for t, w in d["stack_free_min_words"].items())
+                 + f" {L}"]])
             + "\n\nP-10 (EMU, ≥ 10⁶ samples, 0 CRC errors, 0 unaccounted).")
 
 
@@ -118,7 +119,7 @@ def b09(d):
     return ("### B-09 Corruption Monte Carlo (FI-11, P-11)\n\n"
             + table(["Error", "Trials", "Undetected [HOST]", "Detected [HOST]", "Neighbour frames lost"], rows)
             + f"\n\nStream: {d['stream']}; seed {d['seed']}. The corrupted frame is always rejected. "
-              f"{d['note']}.")
+              f"{d['note'][:1].upper() + d['note'][1:]}.")
 
 
 SECTIONS = [("B-01", b01), ("B-02", b02), ("B-04", b04), ("B-05", b05), ("B-07", b07), ("B-08", b08), ("B-09", b09)]

@@ -15,10 +15,17 @@ whole test and benchmark suite runs in CI.
 
 ## Headline results
 
-HEADLINE_TABLE
+| Metric | Result | Bench |
+|---|---|---|
+| Max zero-loss rate, 4 ADC channels | 2000 Hz `[EMU]`. 4 and 8 kHz overrun in Renode by construction (its ADC takes 400 µs per scan, D13); every lost sample is counted | B-01 |
+| Sample-to-frame latency (L1) at 1 kHz | p50 5.41 ms, p99 9.41 ms, max 9.72 ms `[EMU]` (target p99 ≤ 10 ms) | B-02 |
+| 30 min soak at 1 kHz | 1 801 802 samples, 0 resets, 0 CRC/COBS rejects, 0 drops, exact conservation `[EMU]` | B-07 |
+| Slow link (emulated 115200 baud) | Drops only at the frame pool, 0 at the ring; conservation exact `[EMU]` | B-05 |
+| Corrupted-frame detection | 100 % of 100 000 frames with 1–3 bit flips or ≤ 16-bit bursts `[HOST]` | B-09 |
+| Worst task stack use at 1 kHz | 35.7 % (`tx`); heap 0 bytes `[EMU]`/`[BUILD]` | B-04 |
 
 Every value comes from [docs/results.md](docs/results.md), which `bench/report.py` generates from
-`bench/results/`.
+`bench/results/` (all at commit `f0f20ead`). `[EMU]` timings are Renode virtual time, not silicon.
 
 ## Quickstart
 
