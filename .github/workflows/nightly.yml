@@ -1,0 +1,46 @@
+# PRD §25 nightly: long fuzz, full Renode suite, soak + emulated benchmarks.
+name: nightly
+
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  nightly:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq clang libclang-rt-dev cmake ninja-build
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/rttelemetry-tools
+          key: tools-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('scripts/bootstrap.sh', 'requirements.txt') }}
+      - run: make bootstrap
+      - name: Fuzz 10 min per target
+        run: make fuzz FUZZ_SECONDS=600 FUZZ_CC=clang
+      - run: make test-renode
+      - name: Soak + emulated benchmarks
+        if: hashFiles('bench/**') != ''
+        run: make soak bench-emu
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly
+          if-no-files-found: ignore
+          path: |
+            build/robot/**
+            crash-*
+            bench/results/**

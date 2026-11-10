@@ -1,0 +1,90 @@
+# PRD §25. Every step calls a make target, so CI == local (`make ci-docker` reproduces it).
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  host:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install host tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gcc clang libclang-rt-dev cmake ninja-build cppcheck
+          # TSan in clang 18 aborts with the runner kernel's default ASLR entropy
+          sudo sysctl vm.mmap_rnd_bits=28
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/rttelemetry-tools
+          key: tools-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('scripts/bootstrap.sh', 'requirements.txt') }}
+      - run: make bootstrap
+      - name: Unit tests (GCC, ASan+UBSan)
+        run: make test-host
+      - name: Coverage
+        run: if make -n coverage >/dev/null 2>&1; then make coverage; else echo "no coverage target yet"; fi
+      - name: Unit tests (Clang, ASan+UBSan)
+        run: cmake -E rm -rf build/host && CC=clang make test-host
+      - name: TSan stress (Clang)
+        run: CC=clang make test-tsan
+      - name: Fuzz 60 s per target
+        run: make fuzz FUZZ_SECONDS=60 FUZZ_CC=clang
+      - run: make test-py
+      - run: make static-analysis
+
+  firmware:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq cmake ninja-build
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/rttelemetry-tools
+          key: tools-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('scripts/bootstrap.sh', 'requirements.txt') }}
+      - run: make bootstrap
+      - run: make fw fw-release size-check
+      - run: scripts/check_portability.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: firmware
+          path: |
+            build/fw-*/src/*.elf
+            build/fw-*/src/*.bin
+            build/fw-*/src/*.map
+            build/fw-*/src/*.size.txt
+
+  renode:
+    needs: firmware
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq cmake ninja-build
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/rttelemetry-tools
+          key: tools-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('scripts/bootstrap.sh', 'requirements.txt') }}
+      - run: make bootstrap
+      - run: make test-renode
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: robot
+          path: build/robot/**
