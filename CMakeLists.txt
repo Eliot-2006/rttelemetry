@@ -9,7 +9,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_compile_options(-Wall -Wextra -Werror -Wshadow -Wundef -Wdouble-promotion)
 
 if(CMAKE_CROSSCOMPILING)
-  add_subdirectory(src/core)
+  if(EXISTS ${PROJECT_SOURCE_DIR}/src/core/CMakeLists.txt)
+    add_subdirectory(src/core)
+  endif()
   add_subdirectory(src)                # firmware image
 else()
   set(SANITIZE "" CACHE STRING "Comma-separated sanitizers for host builds (address,undefined | thread)")

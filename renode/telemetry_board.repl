@@ -1,0 +1,26 @@
+// STM32F4DISCOVERY as used by this project. Overrides Renode's stock model so emulated
+// clocks match silicon (one firmware binary for both), and adds peripherals the stock
+// stm32f4.repl lacks. See docs/platform-verification.md.
+using "platforms/boards/stm32f4_discovery.repl"
+
+nvic:
+    systickFrequency: 168000000
+
+// APB1 timer clock on silicon is 84 MHz (stock model: fixed 10 MHz)
+timer2:
+    frequency: 84000000
+
+timer3:
+    frequency: 84000000
+
+ccm: Memory.MappedMemory @ sysbus 0x10000000
+    size: 0x10000
+
+// STM32F4 ADC1 (same IP as the F7 model). ADC1 -> DMA2 Stream0.
+adc1: Analog.STM32_ADC @ sysbus 0x40012000
+    IRQ -> nvic@18
+    DMARequest -> dma2@0
+
+// LSM6DSO IMU on I2C1 (SA0 low = 0x6A); INT1 -> PE4 (EXTI4)
+imu: Sensors.LSM6DSO_IMU @ i2c1 0x6A
+    Interrupt1 -> gpioPortE@4

@@ -1,0 +1,14 @@
+:name: STM32F407 telemetry
+:description: Project machine (STM32F4DISCOVERY + overlay). Set $elf before including.
+
+using sysbus
+$elf?=@build/fw-debug/src/telemetry.elf
+mach create "telem"
+machine LoadPlatformDescription $ORIGIN/telemetry_board.repl
+
+# A watchdog/software reset re-runs this macro. RAM is not cleared, so .noinit survives.
+macro reset
+"""
+    sysbus LoadELF $elf
+"""
+runMacro $reset

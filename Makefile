@@ -6,7 +6,7 @@ FUZZ_CC ?= $(firstword $(wildcard /opt/homebrew/opt/llvm/bin/clang) clang)
 FUZZ_SECONDS ?= 60
 JOBS ?= $(shell getconf _NPROCESSORS_ONLN)
 
-.PHONY: bootstrap fw fw-release test-host test-tsan fuzz test-py test clean
+.PHONY: bootstrap fw fw-release test-host test-tsan fuzz test-py test-platform test clean
 
 bootstrap:
 	TOOLS_DIR=$(TOOLS_DIR) scripts/bootstrap.sh
@@ -31,6 +31,10 @@ fuzz:
 
 test-py:
 	$(ENV) && cd tools && python -m unittest discover -s . -p 'test_*.py'
+
+# Renode integration: platform gates (PRD M0). Virtual-time only; results in build/robot.
+test-platform: fw
+	mkdir -p build/robot/platform && $(ENV) && cd build/robot/platform && "$$RENODE_TEST" $(CURDIR)/tests/platform/gates.robot
 
 test: test-host test-tsan test-py
 
