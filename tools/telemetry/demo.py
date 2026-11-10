@@ -27,6 +27,17 @@ MON_PORT, UART_PORT = 34560, 34561
 EVT = {3: "RING_OVF_ON", 4: "RING_OVF_OFF", 5: "TXPOOL_EMPTY_ON", 6: "TXPOOL_EMPTY_OFF", 13: "WDT_STALL"}
 REASON = {0: "POWER_ON", 1: "CMD", 2: "WDT_TASK_STALL", 3: "HARDFAULT", 4: "STACK_OVF", 5: "ASSERT"}
 STACKS = [384, 384, 384, 384, 384, 128]
+# The scripted sequence, shared with bench B-12: (virtual seconds to run first, command, args, note).
+SCRIPT = [
+    (10, "set-rate", (2000,), "SET_RATE 2000 Hz"),
+    (4, "fi-arm", (1, 300), "FI-01: proc_task stalls 300 ms -> ring overflows, then drains"),
+    (3, "fi-arm", (2, 200), "FI-02: slow link (200 us/byte) -> drops move to the frame pool"),
+    (4, "fi-clear", (), "FI_CLEAR: link back to normal"),
+    (3, "fi-arm", (3, 2), "FI-06: cmd_task hangs -> supervisor stops kicking -> IWDG reset"),
+    (4, "set-rate", (0,), "SET_RATE 0: stop + flush, then GET_STATUS for the final counters"),
+    (1, "get-status", (), "GET_STATUS"),
+]
+TAIL_S = 1
 HIST_EDGES_MS = [0.5, 1, 2, 5, 10, 20, 50, float("inf")]
 
 
@@ -138,21 +149,10 @@ def run(mon):
             time.sleep(0.05)  # let the reader print before the next step
 
     print("== nominal: 1 kHz, 4 ADC channels + IMU at 200 Hz", flush=True)
-    run_s(10)
-    cmd("set-rate", 2000, note="SET_RATE 2000 Hz")
-    run_s(4)
-    cmd("fi-arm", 1, 300, note="FI-01: proc_task stalls 300 ms -> ring overflows, then drains")
-    run_s(3)
-    cmd("fi-arm", 2, 200, note="FI-02: slow link (200 us/byte) -> drops move to the frame pool")
-    run_s(4)
-    cmd("fi-clear", note="FI_CLEAR: link back to normal")
-    run_s(3)
-    cmd("fi-arm", 3, 2, note="FI-06: cmd_task hangs -> supervisor stops kicking -> IWDG reset")
-    run_s(4)
-    cmd("set-rate", 0, note="SET_RATE 0: stop + flush, then GET_STATUS for the final counters")
-    run_s(1)
-    cmd("get-status", note="GET_STATUS")
-    run_s(1)
+    for secs, name, args, note in SCRIPT:
+        run_s(secs)
+        cmd(name, *args, note=note)
+    run_s(TAIL_S)
     time.sleep(0.5)
 
     with dash.lock:

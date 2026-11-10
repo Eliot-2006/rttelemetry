@@ -95,6 +95,9 @@ demo: fw
 
 # Benchmarks (PRD §20.2) without hardware; results in bench/results, report in docs/results.md.
 bench-emu: fw
-	$(ENV) && python bench/bench.py --only B-01,B-05,B-09 && python bench/report.py
+	$(ENV) && python bench/bench.py --only B-01,B-05,B-09,B-10,B-11,B-12 && python bench/report.py
 soak: fw
 	$(ENV) && python bench/bench.py --only B-07 && python bench/report.py
+# Every bench (~45 min, mostly the 30 min soak).
+bench-all: fw
+	$(ENV) && python bench/bench.py && python bench/report.py
