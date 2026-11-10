@@ -61,6 +61,7 @@ void DMA1_Stream6_IRQHandler(void)
 {
     if (DMA1->HISR & DMA_HISR_TCIF6) {
         DMA1->HIFCR = DMA_HIFCR_CTCIF6;
+        TX_STREAM->CR &= ~DMA_SxCR_EN;   /* no-op on silicon (HW clears EN at TC); Renode keeps it set (D14) */
         uart_tx_done_isr();
     }
     DMA1->HIFCR = DMA_HIFCR_CHTIF6 | DMA_HIFCR_CTEIF6 | DMA_HIFCR_CDMEIF6 | DMA_HIFCR_CFEIF6;

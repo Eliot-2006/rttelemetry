@@ -28,3 +28,29 @@ function(add_firmware name)
 endfunction()
 
 add_firmware(platform_gates ${PROJECT_SOURCE_DIR}/tests/platform/gates.c)
+
+# ---- FreeRTOS kernel (vendor code: built without our -Werror warning set) ----
+set(RTOS ${PROJECT_SOURCE_DIR}/third_party/FreeRTOS-Kernel)
+add_library(freertos STATIC
+  ${RTOS}/tasks.c ${RTOS}/queue.c ${RTOS}/list.c ${RTOS}/portable/GCC/ARM_CM4F/port.c)
+target_include_directories(freertos PUBLIC ${RTOS}/include ${RTOS}/portable/GCC/ARM_CM4F platform)
+target_link_libraries(freertos PUBLIC platform)
+target_compile_options(freertos PRIVATE -w)
+
+# ---- telemetry application ----
+option(FAULT_INJECTION "Compile fault-injection commands (debug/test builds)" OFF)
+execute_process(COMMAND git rev-parse --short=8 HEAD WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                OUTPUT_VARIABLE GIT_SHA OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
+if(NOT GIT_SHA)
+  set(GIT_SHA "00000000")
+endif()
+
+add_firmware(telemetry
+  app/main.c app/acq.c app/proc.c app/telemetry.c app/health.c app/uplink.c app/fault_inject.c
+  platform/fault.c)
+target_include_directories(telemetry PRIVATE app)
+target_link_libraries(telemetry PRIVATE freertos core)
+target_compile_definitions(telemetry PRIVATE
+  FAULT_INJECTION=$<BOOL:${FAULT_INJECTION}>
+  FW_GIT_SHA="${GIT_SHA}"
+  FW_BUILD_RELEASE=$<IF:$<CONFIG:Release>,1,0>)

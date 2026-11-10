@@ -4,6 +4,8 @@ ENV := . $(TOOLS_DIR)/env.sh
 # libFuzzer needs LLVM clang (Apple clang lacks it): Homebrew LLVM on macOS, system clang on Linux.
 FUZZ_CC ?= $(firstword $(wildcard /opt/homebrew/opt/llvm/bin/clang) clang)
 FUZZ_SECONDS ?= 60
+# Host tests use the same clang: Apple clang 15's ASan aborts at startup on macOS 27.
+HOST_CC ?= $(FUZZ_CC)
 JOBS ?= $(shell getconf _NPROCESSORS_ONLN)
 
 .PHONY: bootstrap fw fw-release test-host test-tsan fuzz test-py test-platform test coverage clean
@@ -18,10 +20,10 @@ fw-release:
 	$(ENV) && cmake --preset fw-release >/dev/null && cmake --build build/fw-release -j$(JOBS)
 
 test-host:
-	cmake --preset host >/dev/null && cmake --build build/host -j$(JOBS) && ctest --test-dir build/host --output-on-failure -LE stress
+	cmake --preset host -DCMAKE_C_COMPILER=$(HOST_CC) >/dev/null && cmake --build build/host -j$(JOBS) && ctest --test-dir build/host --output-on-failure -LE stress
 
 test-tsan:
-	cmake --preset host-tsan >/dev/null && cmake --build build/host-tsan -j$(JOBS) && ctest --test-dir build/host-tsan --output-on-failure -L stress
+	cmake --preset host-tsan -DCMAKE_C_COMPILER=$(HOST_CC) >/dev/null && cmake --build build/host-tsan -j$(JOBS) && ctest --test-dir build/host-tsan --output-on-failure -L stress
 
 fuzz:
 	cmake --preset host-fuzz -DCMAKE_C_COMPILER=$(FUZZ_CC) >/dev/null && cmake --build build/host-fuzz -j$(JOBS)

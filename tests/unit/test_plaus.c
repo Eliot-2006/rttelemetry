@@ -62,6 +62,13 @@ static void test_combined_flags(void)
     TEST_ASSERT_EQUAL_UINT8(PLAUS_RANGE | PLAUS_STUCK, plaus_check(&c2, &st, 5));
 }
 
+static void test_stuck_disabled_when_n_is_zero(void)
+{
+    const plaus_cfg_t c = {.min = 0, .max = 4095, .roc_max = 4095, .stuck_n = 0};
+    plaus_state_t st = {0};
+    for (int i = 0; i < 1000; i++) TEST_ASSERT_EQUAL_UINT8(0, plaus_check(&c, &st, 1500));
+}
+
 static void test_status_packing(void)
 {
     TEST_ASSERT_EQUAL_HEX16(0x0001, PLAUS_STATUS(0, PLAUS_RANGE));
@@ -77,6 +84,7 @@ int main(void)
     RUN_TEST(test_stuck_at_n_minus_1_and_n);
     RUN_TEST(test_roc_thresholds);
     RUN_TEST(test_combined_flags);
+    RUN_TEST(test_stuck_disabled_when_n_is_zero);
     RUN_TEST(test_status_packing);
     return UNITY_END();
 }

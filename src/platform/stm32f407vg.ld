@@ -3,6 +3,8 @@
  *   FLASH 1 MiB, SRAM1+2 128 KiB (DMA-capable), CCM 64 KiB (CPU only - NO DMA on silicon).
  * Sections:
  *   .noinit   SRAM, never zeroed: reset/crash record survives warm resets.
+ *   .msp      CCM bottom, 2 KiB main/ISR stack (PRD §8.5). Overflow runs off 0x10000000 into
+ *             unmapped space and faults instead of silently corrupting data.
  *   .ccm      CCM, NOLOAD, not zeroed: task stacks only (FreeRTOS fills them itself).
  */
 ENTRY(Reset_Handler)
@@ -14,8 +16,9 @@ MEMORY
   CCM   (rw)  : ORIGIN = 0x10000000, LENGTH = 64K
 }
 
-_estack = ORIGIN(RAM) + LENGTH(RAM);   /* MSP (main + ISR stack) grows down from top of SRAM */
-_Min_Stack_Size = 0x800;               /* 2 KiB reserved for MSP; checked below */
+_Min_Stack_Size = 0x800;               /* 2 KiB MSP (main + ISR stack) */
+__msp_limit = ORIGIN(CCM);
+_estack = ORIGIN(CCM) + _Min_Stack_Size;
 
 SECTIONS
 {
@@ -61,15 +64,8 @@ SECTIONS
   .noinit (NOLOAD) : { . = ALIGN(4); *(.noinit) *(.noinit*) . = ALIGN(4); } >RAM
 
   /* No heap: newlib's sbrk is replaced by a trapping stub (syscalls.c). */
-  ._msp_reserve (NOLOAD) :
-  {
-    . = ALIGN(8);
-    __msp_limit = .;
-    . = . + _Min_Stack_Size;
-    . = ALIGN(8);
-  } >RAM
-  ASSERT(__msp_limit + _Min_Stack_Size <= _estack, "SRAM overflow: no room for the MSP stack")
 
+  .msp (NOLOAD) : { . = . + _Min_Stack_Size; } >CCM
   .ccm (NOLOAD) : { . = ALIGN(8); *(.ccm) *(.ccm*) . = ALIGN(8); } >CCM
 
   .ARM.attributes 0 : { *(.ARM.attributes) }

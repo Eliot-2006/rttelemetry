@@ -6,7 +6,7 @@
 #include <stdint.h>
 
 #define PLAUS_RANGE 1u /* raw < min || raw > max */
-#define PLAUS_STUCK 2u /* this sample is the stuck_n-th (or later) identical consecutive value */
+#define PLAUS_STUCK 2u /* this sample is the stuck_n-th (or later) identical consecutive value; stuck_n 0 = off */
 #define PLAUS_ROC 4u   /* |raw - previous raw| > roc_max */
 
 /* Per-sample status word: 4 bits per channel, channel 0 in the low nibble. */
