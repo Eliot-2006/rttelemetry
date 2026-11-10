@@ -157,9 +157,9 @@ def rate_sweep(d):
 
 def latency_hist(d):
     h, l1 = d["l1_hist"], d["l1_us"]
-    s = Svg(720, 320, "Sample-to-frame latency (L1) at 1 kHz",
+    s = Svg(720, 344, "Sample-to-frame latency (L1) at 1 kHz",
             sub(d, f"B-02 · {d['samples']:,} samples"))
-    x0, x1, y0, y1 = 76, 696, 268, 92
+    x0, x1, y0, y1 = 76, 696, 292, 128
     xmax_ms = 12
     xmap = lambda ms: x0 + (x1 - x0) * ms / xmax_ms
     ymap = y_axis(s, x0, x1, y0, y1, nice_ticks(max(h["counts"])))
@@ -169,14 +169,16 @@ def latency_hist(d):
     for ms in range(0, xmax_ms + 1, 2):
         s.text(xmap(ms), y0 + 18, f"{ms}", "t3", size=11, anchor="middle")
     s.text(x1, y0 + 36, "L1: frame handed to TX minus sample trigger (ms)", "t3", size=11, anchor="end")
-    s.text(x0 - 52, y1 - 14, "samples per 0.25 ms", "t3", size=11)
-    for key, label, dy in (("p50", "p50", 0), ("p99", "p99", 0), ("max", "max", 14)):
+    s.text(24, y1 - 16, "samples per 0.25 ms", "t3", size=11)
+    for key, top in (("p50", 12), ("p99", 34), ("max", 12)):
         x = xmap(l1[key] / 1000)
-        s.line(x, y1 - 4 + dy, x, y0, "ref", extra=' stroke-opacity=".55"')
-        s.text(x + 4, y1 + 6 + dy, f"{label} {l1[key] / 1000:.2f} ms", "t1", size=11)
+        s.line(x, y1 - top, x, y0, "ref", extra=' stroke-opacity=".55"')
+    s.text(xmap(l1["p50"] / 1000) + 4, y1 - 16, f"p50 {l1['p50'] / 1000:.2f} ms", "t1", size=11, weight=600)
+    s.text(xmap(l1["p99"] / 1000) - 4, y1 - 38, f"p99 {l1['p99'] / 1000:.2f} ms · max {l1['max'] / 1000:.2f} ms",
+           "t1", size=11, anchor="end", weight=600)
     xt = xmap(10)
-    s.line(xt, y1 - 16, xt, y0, "ks2", width=1.5)
-    s.text(xt + 4, y1 - 8, "P-03 target: p99 ≤ 10 ms", "t2", size=11)
+    s.line(xt, y1 - 34, xt, y0, "ks2", width=1.5)
+    s.text(xt + 4, y1 - 38, "P-03: p99 ≤ 10 ms", "t2", size=11)
     s.save("latency.svg", f"Histogram of L1 latency for {d['samples']} samples at 1 kHz. p50 {l1['p50'] / 1000:.2f} "
            f"ms, p99 {l1['p99'] / 1000:.2f} ms, max {l1['max'] / 1000:.2f} ms; target p99 at most 10 ms.")
 

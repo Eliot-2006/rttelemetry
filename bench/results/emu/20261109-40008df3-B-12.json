@@ -1,0 +1,608 @@
+{
+ "bench": "B-12",
+ "env": "emu",
+ "commit": "40008df3",
+ "dirty": false,
+ "toolchain": "arm-none-eabi-gcc (Arm GNU Toolchain 15.2.Rel1 (Build arm-15.86)) 15.2.1 20251203",
+ "renode": "1.17.0",
+ "freertos": "V11.3.3",
+ "python": "3.12.13",
+ "host_os": "Darwin 27.0.0 arm64",
+ "firmware": {
+  "default_rate_hz": 1000,
+  "batch": 10,
+  "baud": 921600,
+  "ring": 128,
+  "pool": 4,
+  "elf": "build/fw-debug/src/telemetry.elf"
+ },
+ "script": [
+  {
+   "t_s": 10.0,
+   "cmd": "set-rate",
+   "args": [
+    2000
+   ],
+   "note": "SET_RATE 2000 Hz"
+  },
+  {
+   "t_s": 14.0,
+   "cmd": "fi-arm",
+   "args": [
+    1,
+    300
+   ],
+   "note": "FI-01: proc_task stalls 300 ms -> ring overflows, then drains"
+  },
+  {
+   "t_s": 17.0,
+   "cmd": "fi-arm",
+   "args": [
+    2,
+    200
+   ],
+   "note": "FI-02: slow link (200 us/byte) -> drops move to the frame pool"
+  },
+  {
+   "t_s": 21.0,
+   "cmd": "fi-clear",
+   "args": [],
+   "note": "FI_CLEAR: link back to normal"
+  },
+  {
+   "t_s": 24.0,
+   "cmd": "fi-arm",
+   "args": [
+    3,
+    2
+   ],
+   "note": "FI-06: cmd_task hangs -> supervisor stops kicking -> IWDG reset"
+  },
+  {
+   "t_s": 28.0,
+   "cmd": "set-rate",
+   "args": [
+    0
+   ],
+   "note": "SET_RATE 0: stop + flush, then GET_STATUS for the final counters"
+  },
+  {
+   "t_s": 29.0,
+   "cmd": "get-status",
+   "args": [],
+   "note": "GET_STATUS"
+  }
+ ],
+ "boots": [
+  {
+   "t_s": 0.0,
+   "reason": 0,
+   "task": ""
+  },
+  {
+   "t_s": 24.9988,
+   "reason": 2,
+   "task": "cmd"
+  }
+ ],
+ "health": [
+  {
+   "boot": 0,
+   "t_s": 1.0,
+   "sample_rate_hz": 1000,
+   "triggered": 1001,
+   "delivered": 1000,
+   "dropped_overrun": 0,
+   "dropped_ring": 0,
+   "dropped_txpool": 0,
+   "ring_occ": 0,
+   "ring_hwm": 1,
+   "txpool_free_min": 2,
+   "cpu_load_permille": 51
+  },
+  {
+   "boot": 0,
+   "t_s": 2.0,
+   "sample_rate_hz": 1000,
+   "triggered": 2002,
+   "delivered": 2000,
+   "dropped_overrun": 0,
+   "dropped_ring": 0,
+   "dropped_txpool": 0,
+   "ring_occ": 0,
+   "ring_hwm": 1,
+   "txpool_free_min": 3,
+   "cpu_load_permille": 56
+  },
+  {
+   "boot": 0,
+   "t_s": 3.0,
+   "sample_rate_hz": 1000,
+   "triggered": 3003,
+   "delivered": 3000,
+   "dropped_overrun": 0,
+   "dropped_ring": 0,
+   "dropped_txpool": 0,
+   "ring_occ": 0,
+   "ring_hwm": 1,
+   "txpool_free_min": 3,
+   "cpu_load_permille": 58
+  },
+  {
+   "boot": 0,
+   "t_s": 4.0,
+   "sample_rate_hz": 1000,
+   "triggered": 4004,
+   "delivered": 4000,
+   "dropped_overrun": 0,
+   "dropped_ring": 0,
+   "dropped_txpool": 0,
+   "ring_occ": 0,
+   "ring_hwm": 1,
+   "txpool_free_min": 3,
+   "cpu_load_permille": 52
+  },
+  {
+   "boot": 0,
+   "t_s": 5.0,
+   "sample_rate_hz": 1000,
+   "triggered": 5005,
+   "delivered": 5000,
+   "dropped_overrun": 0,
+   "dropped_ring": 0,
+   "dropped_txpool": 0,
+   "ring_occ": 0,
+   "ring_hwm": 1,
+   "txpool_free_min": 3,
+   "cpu_load_permille": 51
+  },
+  {
+   "boot": 0,
+   "t_s": 6.0,
+   "sample_rate_hz": 1000,
+   "triggered": 6006,
+   "delivered": 6000,
+   "dropped_overrun": 0,
+   "dropped_ring": 0,
+   "dropped_txpool": 0,
+   "ring_occ": 0,
+   "ring_hwm": 1,
+   "txpool_free_min": 3,
+   "cpu_load_permille": 51
+  },
+  {
+   "boot": 0,
+   "t_s": 7.0,
+   "sample_rate_hz": 1000,
+   "triggered": 7007,
+   "delivered": 7000,
+   "dropped_overrun": 0,
+   "dropped_ring": 0,
+   "dropped_txpool": 0,
+   "ring_occ": 0,
+   "ring_hwm": 1,
+   "txpool_free_min": 3,
+   "cpu_load_permille": 51
+  },
+  {
+   "boot": 0,
+   "t_s": 8.0,
+   "sample_rate_hz": 1000,
+   "triggered": 8008,
+   "delivered": 8000,
+   "dropped_overrun": 0,
+   "dropped_ring": 0,
+   "dropped_txpool": 0,
+   "ring_occ": 0,
+   "ring_hwm": 1,
+   "txpool_free_min": 3,
+   "cpu_load_permille": 51
+  },
+  {
+   "boot": 0,
+   "t_s": 9.0,
+   "sample_rate_hz": 1000,
+   "triggered": 9009,
+   "delivered": 9000,
+   "dropped_overrun": 0,
+   "dropped_ring": 0,
+   "dropped_txpool": 0,
+   "ring_occ": 0,
+   "ring_hwm": 1,
+   "txpool_free_min": 3,
+   "cpu_load_permille": 51
+  },
+  {
+   "boot": 0,
+   "t_s": 10.0,
+   "sample_rate_hz": 1000,
+   "triggered": 10010,
+   "delivered": 10000,
+   "dropped_overrun": 0,
+   "dropped_ring": 0,
+   "dropped_txpool": 0,
+   "ring_occ": 0,
+   "ring_hwm": 1,
+   "txpool_free_min": 3,
+   "cpu_load_permille": 51
+  },
+  {
+   "boot": 0,
+   "t_s": 11.0,
+   "sample_rate_hz": 2000,
+   "triggered": 12013,
+   "delivered": 12010,
+   "dropped_overrun": 0,
+   "dropped_ring": 0,
+   "dropped_txpool": 0,
+   "ring_occ": 0,
+   "ring_hwm": 1,
+   "txpool_free_min": 2,
+   "cpu_load_permille": 90
+  },
+  {
+   "boot": 0,
+   "t_s": 12.0,
+   "sample_rate_hz": 2000,
+   "triggered": 14017,
+   "delivered": 14010,
+   "dropped_overrun": 0,
+   "dropped_ring": 0,
+   "dropped_txpool": 0,
+   "ring_occ": 0,
+   "ring_hwm": 1,
+   "txpool_free_min": 3,
+   "cpu_load_permille": 90
+  },
+  {
+   "boot": 0,
+   "t_s": 13.0,
+   "sample_rate_hz": 2000,
+   "triggered": 16021,
+   "delivered": 16020,
+   "dropped_overrun": 0,
+   "dropped_ring": 0,
+   "dropped_txpool": 0,
+   "ring_occ": 0,
+   "ring_hwm": 1,
+   "txpool_free_min": 2,
+   "cpu_load_permille": 90
+  },
+  {
+   "boot": 0,
+   "t_s": 14.0,
+   "sample_rate_hz": 2000,
+   "triggered": 18025,
+   "delivered": 18020,
+   "dropped_overrun": 0,
+   "dropped_ring": 0,
+   "dropped_txpool": 0,
+   "ring_occ": 0,
+   "ring_hwm": 1,
+   "txpool_free_min": 2,
+   "cpu_load_permille": 90
+  },
+  {
+   "boot": 0,
+   "t_s": 15.0,
+   "sample_rate_hz": 2000,
+   "triggered": 20029,
+   "delivered": 19450,
+   "dropped_overrun": 0,
+   "dropped_ring": 472,
+   "dropped_txpool": 97,
+   "ring_occ": 0,
+   "ring_hwm": 128,
+   "txpool_free_min": 0,
+   "cpu_load_permille": 69
+  },
+  {
+   "boot": 0,
+   "t_s": 16.0,
+   "sample_rate_hz": 2000,
+   "triggered": 22033,
+   "delivered": 21460,
+   "dropped_overrun": 0,
+   "dropped_ring": 472,
+   "dropped_txpool": 97,
+   "ring_occ": 0,
+   "ring_hwm": 128,
+   "txpool_free_min": 2,
+   "cpu_load_permille": 90
+  },
+  {
+   "boot": 0,
+   "t_s": 17.0,
+   "sample_rate_hz": 2000,
+   "triggered": 24037,
+   "delivered": 23460,
+   "dropped_overrun": 0,
+   "dropped_ring": 472,
+   "dropped_txpool": 97,
+   "ring_occ": 0,
+   "ring_hwm": 128,
+   "txpool_free_min": 3,
+   "cpu_load_permille": 90
+  },
+  {
+   "boot": 0,
+   "t_s": 22.0,
+   "sample_rate_hz": 2000,
+   "triggered": 34057,
+   "delivered": 26430,
+   "dropped_overrun": 0,
+   "dropped_ring": 472,
+   "dropped_txpool": 7147,
+   "ring_occ": 0,
+   "ring_hwm": 128,
+   "txpool_free_min": 0,
+   "cpu_load_permille": 93
+  },
+  {
+   "boot": 0,
+   "t_s": 23.0,
+   "sample_rate_hz": 2000,
+   "triggered": 36061,
+   "delivered": 28440,
+   "dropped_overrun": 0,
+   "dropped_ring": 472,
+   "dropped_txpool": 7147,
+   "ring_occ": 0,
+   "ring_hwm": 128,
+   "txpool_free_min": 2,
+   "cpu_load_permille": 93
+  },
+  {
+   "boot": 0,
+   "t_s": 24.0,
+   "sample_rate_hz": 2000,
+   "triggered": 38065,
+   "delivered": 30440,
+   "dropped_overrun": 0,
+   "dropped_ring": 472,
+   "dropped_txpool": 7147,
+   "ring_occ": 0,
+   "ring_hwm": 128,
+   "txpool_free_min": 3,
+   "cpu_load_permille": 90
+  },
+  {
+   "boot": 1,
+   "t_s": 25.999,
+   "sample_rate_hz": 1000,
+   "triggered": 1001,
+   "delivered": 1000,
+   "dropped_overrun": 0,
+   "dropped_ring": 0,
+   "dropped_txpool": 0,
+   "ring_occ": 0,
+   "ring_hwm": 1,
+   "txpool_free_min": 2,
+   "cpu_load_permille": 51
+  },
+  {
+   "boot": 1,
+   "t_s": 26.999,
+   "sample_rate_hz": 1000,
+   "triggered": 2002,
+   "delivered": 2000,
+   "dropped_overrun": 0,
+   "dropped_ring": 0,
+   "dropped_txpool": 0,
+   "ring_occ": 0,
+   "ring_hwm": 1,
+   "txpool_free_min": 3,
+   "cpu_load_permille": 56
+  },
+  {
+   "boot": 1,
+   "t_s": 27.999,
+   "sample_rate_hz": 1000,
+   "triggered": 3003,
+   "delivered": 3000,
+   "dropped_overrun": 0,
+   "dropped_ring": 0,
+   "dropped_txpool": 0,
+   "ring_occ": 0,
+   "ring_hwm": 1,
+   "txpool_free_min": 3,
+   "cpu_load_permille": 58
+  },
+  {
+   "boot": 1,
+   "t_s": 28.999,
+   "sample_rate_hz": 0,
+   "triggered": 3004,
+   "delivered": 3004,
+   "dropped_overrun": 0,
+   "dropped_ring": 0,
+   "dropped_txpool": 0,
+   "ring_occ": 0,
+   "ring_hwm": 1,
+   "txpool_free_min": 3,
+   "cpu_load_permille": 13
+  },
+  {
+   "boot": 1,
+   "t_s": 29.0,
+   "sample_rate_hz": 0,
+   "triggered": 3004,
+   "delivered": 3004,
+   "dropped_overrun": 0,
+   "dropped_ring": 0,
+   "dropped_txpool": 0,
+   "ring_occ": 0,
+   "ring_hwm": 1,
+   "txpool_free_min": 3,
+   "cpu_load_permille": 789
+  }
+ ],
+ "events": [
+  {
+   "boot": 0,
+   "t_s": 0.0007,
+   "id": 1,
+   "name": "BOOT",
+   "arg": 1
+  },
+  {
+   "boot": 0,
+   "t_s": 0.0007,
+   "id": 2,
+   "name": "RESET_REASON",
+   "arg": 0
+  },
+  {
+   "boot": 0,
+   "t_s": 10.0009,
+   "id": 11,
+   "name": "RATE_CHANGED",
+   "arg": 2000
+  },
+  {
+   "boot": 0,
+   "t_s": 14.001,
+   "id": 12,
+   "name": "FI_ARMED",
+   "arg": 16777516
+  },
+  {
+   "boot": 0,
+   "t_s": 14.3011,
+   "id": 5,
+   "name": "TXPOOL_EMPTY_ON",
+   "arg": 10
+  },
+  {
+   "boot": 0,
+   "t_s": 14.3023,
+   "id": 8,
+   "name": "SENSOR_FLAG_ON",
+   "arg": 4
+  },
+  {
+   "boot": 0,
+   "t_s": 14.3023,
+   "id": 8,
+   "name": "SENSOR_FLAG_ON",
+   "arg": 260
+  },
+  {
+   "boot": 0,
+   "t_s": 14.3023,
+   "id": 9,
+   "name": "SENSOR_FLAG_OFF",
+   "arg": 4
+  },
+  {
+   "boot": 0,
+   "t_s": 14.3023,
+   "id": 9,
+   "name": "SENSOR_FLAG_OFF",
+   "arg": 260
+  },
+  {
+   "boot": 0,
+   "t_s": 14.3024,
+   "id": 3,
+   "name": "RING_OVF_ON",
+   "arg": 472
+  },
+  {
+   "boot": 0,
+   "t_s": 14.3525,
+   "id": 4,
+   "name": "RING_OVF_OFF",
+   "arg": 472
+  },
+  {
+   "boot": 0,
+   "t_s": 14.407,
+   "id": 6,
+   "name": "TXPOOL_EMPTY_OFF",
+   "arg": 97
+  },
+  {
+   "boot": 0,
+   "t_s": 17.001,
+   "id": 12,
+   "name": "FI_ARMED",
+   "arg": 33554632
+  },
+  {
+   "boot": 0,
+   "t_s": 17.0218,
+   "id": 5,
+   "name": "TXPOOL_EMPTY_ON",
+   "arg": 107
+  },
+  {
+   "boot": 0,
+   "t_s": 21.1385,
+   "id": 6,
+   "name": "TXPOOL_EMPTY_OFF",
+   "arg": 7050
+  },
+  {
+   "boot": 1,
+   "t_s": 24.9995,
+   "id": 1,
+   "name": "BOOT",
+   "arg": 2
+  },
+  {
+   "boot": 1,
+   "t_s": 24.9995,
+   "id": 2,
+   "name": "RESET_REASON",
+   "arg": 2
+  },
+  {
+   "boot": 1,
+   "t_s": 25.0007,
+   "id": 8,
+   "name": "SENSOR_FLAG_ON",
+   "arg": 1
+  },
+  {
+   "boot": 1,
+   "t_s": 25.0007,
+   "id": 8,
+   "name": "SENSOR_FLAG_ON",
+   "arg": 257
+  },
+  {
+   "boot": 1,
+   "t_s": 25.0007,
+   "id": 8,
+   "name": "SENSOR_FLAG_ON",
+   "arg": 513
+  },
+  {
+   "boot": 1,
+   "t_s": 25.0007,
+   "id": 8,
+   "name": "SENSOR_FLAG_ON",
+   "arg": 769
+  },
+  {
+   "boot": 1,
+   "t_s": 28.0009,
+   "id": 11,
+   "name": "RATE_CHANGED",
+   "arg": 0
+  }
+ ],
+ "rejects": {},
+ "conservation_last_boot": {
+  "ok": true,
+  "triggered": 3004,
+  "delivered": 3004,
+  "dropped": 0,
+  "in_flight": 0,
+  "received": 3004,
+  "link_lost": 0,
+  "missing_seq": 0,
+  "order_errors": 0
+ }
+}

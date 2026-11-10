@@ -1,0 +1,74 @@
+{
+ "bench": "B-11",
+ "env": "emu",
+ "commit": "40008df3",
+ "dirty": false,
+ "toolchain": "arm-none-eabi-gcc (Arm GNU Toolchain 15.2.Rel1 (Build arm-15.86)) 15.2.1 20251203",
+ "renode": "1.17.0",
+ "freertos": "V11.3.3",
+ "python": "3.12.13",
+ "host_os": "Darwin 27.0.0 arm64",
+ "firmware": {
+  "default_rate_hz": 1000,
+  "batch": 10,
+  "baud": 921600,
+  "ring": 128,
+  "pool": 4,
+  "elf": "build/fw-debug/src/telemetry.elf"
+ },
+ "armed_at_s": 1.0,
+ "rows": [
+  {
+   "fault": "FI-06",
+   "injected": "cmd_task hangs",
+   "reason": "WDT_TASK_STALL",
+   "task": "cmd",
+   "reset_after_ms": 999.8,
+   "boot_to_first_batch_ms": 13.922,
+   "recovery_ms": 1013.722,
+   "boots": 2,
+   "dropped_overrun": 3,
+   "conservation_after_reset": true
+  },
+  {
+   "fault": "FI-07",
+   "injected": "UDF: HardFault",
+   "reason": "HARDFAULT",
+   "task": "cmd",
+   "reset_after_ms": 100.6,
+   "boot_to_first_batch_ms": 13.915,
+   "recovery_ms": 114.515,
+   "boots": 2,
+   "dropped_overrun": 3,
+   "conservation_after_reset": true
+  },
+  {
+   "fault": "FI-08",
+   "injected": "stack overflow",
+   "reason": "STACK_OVF",
+   "task": "fi",
+   "reset_after_ms": 104.6,
+   "boot_to_first_batch_ms": 13.915,
+   "recovery_ms": 118.515,
+   "boots": 2,
+   "dropped_overrun": 3,
+   "conservation_after_reset": true
+  },
+  {
+   "fault": "FI-09",
+   "injected": "configASSERT",
+   "reason": "ASSERT",
+   "task": "cmd",
+   "reset_after_ms": 100.6,
+   "boot_to_first_batch_ms": 13.915,
+   "recovery_ms": 114.515,
+   "boots": 2,
+   "dropped_overrun": 3,
+   "conservation_after_reset": true
+  }
+ ],
+ "power_on_to_first_batch_ms": 10.901,
+ "target_p13_ms": 2000,
+ "target_p14_ms": 100,
+ "note": "reset_after_ms runs from the FI_ARM command entering USART2 to the reset, on Renode's virtual clock. boot_to_first_batch_ms is the first SAMPLE_BATCH frame's device timestamp, so it excludes the startup code before TIM2 starts"
+}

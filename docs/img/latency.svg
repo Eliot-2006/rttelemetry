@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="344" viewBox="0 0 720 344" role="img" aria-labelledby="t d" font-family='-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif'>
+<title id="t">Sample-to-frame latency (L1) at 1 kHz</title><desc id="d">Histogram of L1 latency for 60108 samples at 1 kHz. p50 5.41 ms, p99 9.41 ms, max 9.72 ms; target p99 at most 10 ms.</desc>
+<style>.bg{fill:#fcfcfb;stroke:rgba(11,11,11,0.10)}.t1{fill:#0b0b0b}.t2{fill:#52514e}.t3{fill:#6f6d68}.grid{stroke:#e1e0d9}.axis{stroke:#c3c2b7}.ref{stroke:#52514e}.s1{fill:#2a78d6}.ks1{stroke:#2a78d6}.ws1{fill:#2a78d6;fill-opacity:.16}.s2{fill:#eb6834}.ks2{stroke:#eb6834}.ws2{fill:#eb6834;fill-opacity:.16}.s3{fill:#1baf7a}.ks3{stroke:#1baf7a}.ws3{fill:#1baf7a;fill-opacity:.16}.s4{fill:#eda100}.ks4{stroke:#eda100}.ws4{fill:#eda100;fill-opacity:.16}.wn{fill:#0b0b0b;fill-opacity:.05}.ring{stroke:#fcfcfb}@media (prefers-color-scheme:dark){.bg{fill:#1a1a19;stroke:rgba(255,255,255,0.10)}.t1{fill:#f0efec}.t2{fill:#c3c2b7}.t3{fill:#a3a29b}.grid{stroke:#2c2c2a}.axis{stroke:#383835}.ref{stroke:#c3c2b7}.s1{fill:#3987e5}.ks1{stroke:#3987e5}.ws1{fill:#3987e5;fill-opacity:.16}.s2{fill:#d95926}.ks2{stroke:#d95926}.ws2{fill:#d95926;fill-opacity:.16}.s3{fill:#199e70}.ks3{stroke:#199e70}.ws3{fill:#199e70;fill-opacity:.16}.s4{fill:#c98500}.ks4{stroke:#c98500}.ws4{fill:#c98500;fill-opacity:.16}.wn{fill:#ffffff;fill-opacity:.05}.ring{stroke:#1a1a19}}</style>
+<rect x="0.5" y="0.5" width="719.0" height="343.0" rx="8" class="bg"/>
+<text x="24.0" y="34.0" class="t1" font-size="15" text-anchor="start" font-weight="600">Sample-to-frame latency (L1) at 1 kHz</text>
+<text x="24.0" y="54.0" class="t2" font-size="12" text-anchor="start" font-weight="400">B-02 · 60,108 samples · [EMU] Renode virtual time, not hardware · 40008df3</text>
+<line x1="76.0" y1="292.0" x2="696.0" y2="292.0" class="axis" stroke-width="1"/>
+<text x="68.0" y="296.0" class="t3" font-size="11" text-anchor="end" font-weight="400">0</text>
+<line x1="76.0" y1="237.3" x2="696.0" y2="237.3" class="grid" stroke-width="1"/>
+<text x="68.0" y="241.3" class="t3" font-size="11" text-anchor="end" font-weight="400">2,000</text>
+<line x1="76.0" y1="182.7" x2="696.0" y2="182.7" class="grid" stroke-width="1"/>
+<text x="68.0" y="186.7" class="t3" font-size="11" text-anchor="end" font-weight="400">4,000</text>
+<line x1="76.0" y1="128.0" x2="696.0" y2="128.0" class="grid" stroke-width="1"/>
+<text x="68.0" y="132.0" class="t3" font-size="11" text-anchor="end" font-weight="400">6,000</text>
+<path d="M89.9,292.0V130.2Q89.9,128.2 91.9,128.2H98.8Q100.8,128.2 100.8,130.2V292.0Z" class="s1"/>
+<path d="M141.6,292.0V130.2Q141.6,128.2 143.6,128.2H150.5Q152.5,128.2 152.5,130.2V292.0Z" class="s1"/>
+<path d="M193.2,292.0V130.2Q193.2,128.2 195.2,128.2H202.2Q204.2,128.2 204.2,130.2V292.0Z" class="s1"/>
+<path d="M244.9,292.0V130.1Q244.9,128.1 246.9,128.1H253.8Q255.8,128.1 255.8,130.1V292.0Z" class="s1"/>
+<path d="M296.6,292.0V130.1Q296.6,128.1 298.6,128.1H305.5Q307.5,128.1 307.5,130.1V292.0Z" class="s1"/>
+<path d="M348.2,292.0V130.1Q348.2,128.1 350.2,128.1H357.2Q359.2,128.1 359.2,130.1V292.0Z" class="s1"/>
+<path d="M399.9,292.0V130.1Q399.9,128.1 401.9,128.1H408.8Q410.8,128.1 410.8,130.1V292.0Z" class="s1"/>
+<path d="M451.6,292.0V130.1Q451.6,128.1 453.6,128.1H460.5Q462.5,128.1 462.5,130.1V292.0Z" class="s1"/>
+<path d="M503.2,292.0V130.1Q503.2,128.1 505.2,128.1H512.2Q514.2,128.1 514.2,130.1V292.0Z" class="s1"/>
+<path d="M554.9,292.0V130.1Q554.9,128.1 556.9,128.1H563.8Q565.8,128.1 565.8,130.1V292.0Z" class="s1"/>
+<text x="76.0" y="310.0" class="t3" font-size="11" text-anchor="middle" font-weight="400">0</text>
+<text x="179.3" y="310.0" class="t3" font-size="11" text-anchor="middle" font-weight="400">2</text>
+<text x="282.7" y="310.0" class="t3" font-size="11" text-anchor="middle" font-weight="400">4</text>
+<text x="386.0" y="310.0" class="t3" font-size="11" text-anchor="middle" font-weight="400">6</text>
+<text x="489.3" y="310.0" class="t3" font-size="11" text-anchor="middle" font-weight="400">8</text>
+<text x="592.7" y="310.0" class="t3" font-size="11" text-anchor="middle" font-weight="400">10</text>
+<text x="696.0" y="310.0" class="t3" font-size="11" text-anchor="middle" font-weight="400">12</text>
+<text x="696.0" y="328.0" class="t3" font-size="11" text-anchor="end" font-weight="400">L1: frame handed to TX minus sample trigger (ms)</text>
+<text x="24.0" y="112.0" class="t3" font-size="11" text-anchor="start" font-weight="400">samples per 0.25 ms</text>
+<line x1="355.5" y1="116.0" x2="355.5" y2="292.0" class="ref" stroke-width="1" stroke-opacity=".55"/>
+<line x1="562.0" y1="94.0" x2="562.0" y2="292.0" class="ref" stroke-width="1" stroke-opacity=".55"/>
+<line x1="578.4" y1="116.0" x2="578.4" y2="292.0" class="ref" stroke-width="1" stroke-opacity=".55"/>
+<text x="359.5" y="112.0" class="t1" font-size="11" text-anchor="start" font-weight="600">p50 5.41 ms</text>
+<text x="558.0" y="90.0" class="t1" font-size="11" text-anchor="end" font-weight="600">p99 9.41 ms · max 9.72 ms</text>
+<line x1="592.7" y1="94.0" x2="592.7" y2="292.0" class="ks2" stroke-width="1.5"/>
+<text x="596.7" y="90.0" class="t2" font-size="11" text-anchor="start" font-weight="400">P-03: p99 ≤ 10 ms</text>
+</svg>
