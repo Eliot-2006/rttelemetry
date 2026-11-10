@@ -10,7 +10,7 @@ hardware measurement.
 | M1 portable core + host tests + Python decoder | Done | `make test-host test-tsan test-py`, `make coverage`, `make fuzz`, `docs/protocol.md` |
 | M2 RTOS firmware skeleton (tasks, HEALTH, BOOT, watchdog supervisor) | Done | `tests/robot/telemetry.robot` IT-BOOT-1, IT-HEALTH-1 (G3: HEALTH spacing 1 000 000 µs ± 1 ms) |
 | M3 acquisition, processing, commands, loss accounting | Done | IT-ACQ-1/2/3, IT-CMD-1, IT-ACCT-1, FI-03, FI-04 |
-| M4/M5 fault injection and recovery | Pending | |
+| M4/M5 fault injection and recovery | Done | `tests/robot/fault.robot`: FI-01, 02, 05, 06, 07, 08, 09, 10, IT-STRESS-1 (60 s virtual at 8 kHz, no reset, exact conservation, stacks ≥ 25 %), IT-RELEASE-1; IT-GOLD-1 (3 runs + golden identical, also across Renode processes) |
 | M6 benchmarks | Pending | |
 | M7 IMU (P1) | Pending | IT-HEALTH-1 stack check needs `imu_task` |
 | M8 response-time analysis | Tool done | `tools/rta.py`, `docs/scheduling.md` (WCET inputs are placeholders until M6) |
@@ -30,7 +30,14 @@ hardware measurement.
 - The `SENSOR_FLAG_ON/OFF` event arg did not match the protocol (`(ch << 8) | flags`).
 - GET_STATUS answered on the next 100 ms health slot, so a reply could take up to ~100 ms. The health task now waits on a notification with a deadline and answers within one TX slot. This also removed a duplicate HEALTH on every tenth cycle.
 - The MSP high-water mark overflowed `u16`, because the MSP spanned all free SRAM. The MSP is now 2 KiB at the bottom of CCM, as PRD §15.2 specifies: overflow runs off `0x10000000` and faults instead of corrupting data.
+- FI-02 found that the EVENT frame carrying `TXPOOL_EMPTY_ON` was itself dropped by the empty pool. A pending EVENT batch is now retried on the next health slot. `frames_dropped` counts refused send attempts.
+- FI-05: the deframer's oversize discards were not counted anywhere. They now count as `rx_frames_bad`. The RX ring grew to 512 B, and the ISR also wakes `cmd_task` at half-full.
 - Apple clang 15 ASan aborts at startup on macOS 27, even on an empty `main`. The host tests now build with LLVM clang (`HOST_CC` in the Makefile).
+
+## Emulator notes
+
+- The USART2 model delivers RX bytes at a finite rate that is not tied to the baud rate. FI-05 paces oversize frames at 50 ms each so the backlog drains before the final PING.
+- A Renode HardFault/IWDG/software reset reloads the ELF through the `reset` macro. The ADC feed files keep playing from where they were.
 
 ## Decisions
 

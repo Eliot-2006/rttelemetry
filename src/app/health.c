@@ -131,19 +131,23 @@ static void send_boot(void)
     log_event(EVT_RESET_REASON, r->reason);
 }
 
+/* EVENT batches go out through the same frame pool as everything else. If the pool is empty
+ * (e.g. the TXPOOL_EMPTY_ON episode itself) the batch stays pending and is retried on the next
+ * slot instead of being lost; the event queue buffers newer events meanwhile. */
 static void drain_events(void)
 {
-    event_rec_t ev[EVENT_BATCH_MAX];
-    unsigned n;
-    do {
-        n = 0;
+    static event_rec_t ev[EVENT_BATCH_MAX];
+    static unsigned n;
+    for (;;) {
         while (n < EVENT_BATCH_MAX && xQueueReceive(event_q, &ev[n], 0) == pdTRUE) n++;
-        if (n) {
-            size_t len = msg_put_event(payload, sizeof payload, ev, (uint8_t)n);
-            configASSERT(len > 0);
-            telemetry_send(MSG_EVENT, payload, len, now_us());
-        }
-    } while (n == EVENT_BATCH_MAX);
+        if (n == 0u) return;
+        size_t len = msg_put_event(payload, sizeof payload, ev, (uint8_t)n);
+        configASSERT(len > 0);
+        if (!telemetry_send(MSG_EVENT, payload, len, now_us())) return;
+        bool full = n == EVENT_BATCH_MAX;
+        n = 0;
+        if (!full) return;
+    }
 }
 
 void health_task(void *arg)

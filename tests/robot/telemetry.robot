@@ -111,3 +111,24 @@ FI-04b Rate-of-change fault
     Samples Should Match Feed    roc_fault
     ${seqs}=    Flagged Seqs    2    4
     Should Be Equal    ${seqs}    ${{ [600, 601] }}
+
+IT-GOLD-1 Deterministic output, 3 runs
+    [Documentation]    Golden file: tests/golden/nominal.jsonl (git_sha excluded). Firmware changes alter
+    ...                timing fields; regenerate with `make golden` and review the diff.
+    FOR    ${i}    IN RANGE    3
+        Reset Emulation
+        Start Telemetry    nominal
+        Run For    5
+        Capture
+        Save Jsonl    ${OUTPUT DIR}/gold_${i}.jsonl
+    END
+    ${a}=    Get File    ${OUTPUT DIR}/gold_0.jsonl
+    ${b}=    Get File    ${OUTPUT DIR}/gold_1.jsonl
+    ${c}=    Get File    ${OUTPUT DIR}/gold_2.jsonl
+    Should Be Equal    ${a}    ${b}    run 1 differs from run 0
+    Should Be Equal    ${a}    ${c}    run 2 differs from run 0
+    IF    ${UPDATE_GOLDEN}
+        Copy File    ${OUTPUT DIR}/gold_0.jsonl    ${ROOT}/tests/golden/nominal.jsonl
+    END
+    ${g}=    Get File    ${ROOT}/tests/golden/nominal.jsonl
+    Should Be Equal    ${a}    ${g}    output differs from tests/golden/nominal.jsonl

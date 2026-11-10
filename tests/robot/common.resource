@@ -9,6 +9,9 @@ ${ELF}            ${ROOT}/build/fw-debug/src/telemetry.elf
 # D15: Renode 1.17.0 STM32_Timer raises the update event every ARR ticks (silicon: ARR + 1), so an
 # emulated sample period is 1 us shorter than nominal. Firmware keeps the silicon-correct ARR.
 ${TIM_DT_OFFSET}  1
+# imu_task stack in words (HEALTH order: proc, tx, cmd, health, imu, idle); 0 until M7 creates it.
+${IMU_STACK}      0
+${UPDATE_GOLDEN}  ${False}
 
 *** Keywords ***
 Start Telemetry
@@ -34,10 +37,8 @@ Capture
 Send Command
     [Documentation]    Inject one uplink command frame into USART2 RX (queued; delivered as the emulation runs).
     [Arguments]    ${name}    @{args}
-    ${bytes}=    Command Bytes    ${name}    @{args}
-    FOR    ${b}    IN    @{bytes}
-        Execute Command    sysbus.usart2 WriteChar ${b}
-    END
+    ${cmd}=    Command Inject    ${name}    @{args}
+    Execute Command    ${cmd}
 
 Stop And Flush
     [Documentation]    SET_RATE 0 stops sampling; proc flushes the partial batch within FLUSH_US;

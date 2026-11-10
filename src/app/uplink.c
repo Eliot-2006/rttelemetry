@@ -15,7 +15,9 @@ static deframer_t deframer;
 
 void uart_rx_byte_isr(uint8_t b)
 {
-    if (ring_push(&rx_ring, &b) && b == 0x00u) {      /* wake on frame delimiter only */
+    /* Wake on a frame delimiter, or at half-full so a long (oversize) frame cannot fill the ring
+     * before cmd_task drains it. */
+    if (ring_push(&rx_ring, &b) && (b == 0x00u || ring_count(&rx_ring) == RX_RING_CAP / 2u)) {
         BaseType_t woken = pdFALSE;
         vTaskNotifyGiveFromISR(h_cmd, &woken);
         portYIELD_FROM_ISR(woken);
@@ -69,6 +71,7 @@ void cmd_task(void *arg)
     deframer_init(&deframer);
     uart_rx_enable_irq();
     static uint8_t scratch[FRAME_SCRATCH_LEN];
+    uint32_t ovf_seen = 0;
     for (;;) {
         (void)ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(100));
         alive(TID_CMD);
@@ -77,7 +80,13 @@ void cmd_task(void *arg)
         while (ring_pop(&rx_ring, &b)) {
             const uint8_t *wire;
             size_t wire_len;
-            if (!deframer_push(&deframer, b, &wire, &wire_len)) continue;
+            if (!deframer_push(&deframer, b, &wire, &wire_len)) {
+                if (deframer.overflows != ovf_seen) {      /* oversize frame discarded */
+                    ovf_seen = deframer.overflows;
+                    atomic_fetch_add(&ctr.rx_frames_bad, 1u);
+                }
+                continue;
+            }
             frame_hdr_t hdr;
             const uint8_t *payload;
             if (frame_decode(wire, wire_len, scratch, sizeof scratch, &hdr, &payload) != FRAME_OK) {

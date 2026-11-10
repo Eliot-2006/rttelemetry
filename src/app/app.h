@@ -23,7 +23,7 @@
 #define BATCH_N           SAMPLE_BATCH_MAX      /* 10 samples per SAMPLE_BATCH frame */
 #define FLUSH_US          20000u                /* emit a partial batch once its oldest sample is this old */
 #define RING_CAP          128u                  /* sample records, power of two */
-#define RX_RING_CAP       256u
+#define RX_RING_CAP       512u                  /* bytes; holds two max-size wire frames */
 #define POOL_N            4u
 #define EVENT_Q_LEN       32u
 #define WDT_TIMEOUT_MS    1000u
@@ -45,7 +45,7 @@ typedef struct {
     _Atomic uint32_t dropped_txpool;    /* proc */
     _Atomic uint32_t delivered;         /* proc: samples handed to tx inside frames */
     _Atomic uint32_t frames_sent;       /* tx */
-    _Atomic uint32_t frames_dropped;    /* any producer (atomic add) */
+    _Atomic uint32_t frames_dropped;    /* send attempts refused by an empty pool (EVENT batches are retried) */
     _Atomic uint32_t rx_frames_ok, rx_frames_bad;   /* cmd */
     _Atomic uint32_t event_drops;       /* any context (atomic add) */
     _Atomic uint32_t tx_timeouts;       /* tx */

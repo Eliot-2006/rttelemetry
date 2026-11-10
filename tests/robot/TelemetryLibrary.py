@@ -3,6 +3,9 @@ every check raises AssertionError with the numbers that failed. A capture is the
 stream written by Renode's file backend; it may hold several boots (BOOT frames split it)."""
 import json
 import pathlib
+import random
+import re
+import subprocess
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -10,7 +13,7 @@ sys.path.insert(0, str(ROOT / "tools"))
 
 import gen_feed  # noqa: E402
 from telemetry.accounting import Accounting, in_flight  # noqa: E402
-from telemetry.frames import encode_command  # noqa: E402
+from telemetry.frames import FrameError, decode_frame, encode_command, encode_frame  # noqa: E402
 from telemetry.stream import Deframer  # noqa: E402
 
 # Mirror of plaus_cfg in src/app/proc.c: (min, max, roc_max, stuck_n); stuck_n 0 = off.
@@ -54,10 +57,87 @@ class TelemetryLibrary:
         self.rejects = dict(d.rejects)
         return len(self.frames)
 
-    def command_bytes(self, name, *args):
-        """Hex byte list for `sysbus.usart2 WriteChar`, with an auto-incrementing command seq."""
+    @staticmethod
+    def uart_inject(data):
+        """Monitor command that queues `data` on USART2 RX in one call (delivered as emulation runs)."""
+        return f"python \"u = monitor.Machine['sysbus.usart2']; [u.WriteChar(b) for b in {list(data)}]\""
+
+    def command_inject(self, name, *args):
         self._seq += 1
-        return [hex(b) for b in encode_command(name, self._seq, *(int(a) for a in args))]
+        return self.uart_inject(encode_command(name, self._seq, *(int(a) for a in args)))
+
+    def malformed_uplink_chunks(self, seed=1):
+        """FI-05: 1000 malformed frames as injection commands, 5 per chunk (oversize ones alone).
+        250 corrupted, 250 truncated, 200 random, 200 valid-CRC with invalid arguments, 100
+        oversize. Each is classified by the Python decoder (independent of the C one); the
+        expected counters are kept for `malformed_counts_should_match`."""
+        rng = random.Random(int(seed))
+        valid = lambda: encode_command("set-rate", rng.randrange(1, 60000), 1000)[:-1]  # noqa: E731
+        def corrupt():
+            w = bytearray(valid())
+            i = rng.randrange(1, len(w))
+            x = w[i] ^ (1 << rng.randrange(8))
+            w[i] = x or w[i] ^ 0x80  # stay non-zero (0x00 is the delimiter) and always differ
+            return bytes(w)
+        def nz(n):
+            return bytes(rng.randrange(1, 256) for _ in range(n))
+        invalid = [
+            lambda: encode_command("set-rate", 1, 333),                           # ACK_ERR_RANGE
+            lambda: encode_frame(0x80, 1, 0, b"x"),                               # ACK_ERR_LEN
+            lambda: encode_frame(0x85, 1, 0, b""),                                # ACK_ERR_UNKNOWN
+            lambda: encode_command("fi-arm", 1, 99, 0),                           # unknown fault id
+        ]
+        kinds = {
+            "corrupt": (250, corrupt),
+            "truncated": (250, lambda: valid()[: rng.randrange(1, 10)]),
+            "random": (200, lambda: nz(rng.randrange(1, 40))),
+            "invalid": (200, lambda: invalid[rng.randrange(len(invalid))]()[:-1]),
+        }
+        small = []
+        for i in range(250):
+            for k, (n, make) in kinds.items():
+                if i < n:
+                    small.append(make())
+        oversize = [nz(rng.randrange(260, 400)) for _ in range(100)]
+        ok = bad = 0
+        for w in small + oversize:
+            try:
+                decode_frame(w)
+                ok += 1
+            except FrameError:
+                bad += 1
+        self.expect = {"rx_frames_ok": ok, "rx_frames_bad": bad, "nacks": ok}
+        chunks = [b"".join(w + b"\0" for w in small[i:i + 5]) for i in range(0, len(small), 5)]
+        chunks += [w + b"\0" for w in oversize]
+        return [self.uart_inject(c) for c in chunks]
+
+    def malformed_counts_should_match(self, base_ok=0, base_bad=0):
+        p = self.last_health()
+        e = self.expect
+        _check(p["rx_frames_bad"] - int(base_bad) == e["rx_frames_bad"],
+               f"rx_frames_bad {p['rx_frames_bad']} - {base_bad} != expected {e['rx_frames_bad']}")
+        _check(p["rx_frames_ok"] - int(base_ok) >= e["rx_frames_ok"],
+               f"rx_frames_ok {p['rx_frames_ok']} - {base_ok} < expected {e['rx_frames_ok']}")
+        _check(p["rx_bytes_dropped"] == 0, f"rx_bytes_dropped {p['rx_bytes_dropped']}")
+        nacks = [a for a in self.acks() if a["status"] != 0]
+        _check(len(nacks) == e["nacks"], f"{len(nacks)} error ACKs, expected {e['nacks']}")
+        return e
+
+    @staticmethod
+    def symbol_address(elf, name):
+        out = subprocess.run(["arm-none-eabi-nm", str(elf)], capture_output=True, text=True, check=True).stdout
+        for line in out.splitlines():
+            parts = line.split()
+            if len(parts) == 3 and parts[2] == name:
+                return int(parts[0], 16)
+        raise AssertionError(f"symbol {name} not in {elf}")
+
+    @staticmethod
+    def source_line(path, pattern):
+        for i, line in enumerate(pathlib.Path(path).read_text().splitlines(), 1):
+            if re.search(pattern, line):
+                return i
+        raise AssertionError(f"{pattern!r} not found in {path}")
 
     def save_jsonl(self, path, drop=("git_sha",)):
         with open(path, "w") as f:
@@ -191,6 +271,14 @@ class TelemetryLibrary:
 
     def health_count(self):
         return len(self.frames_of("HEALTH"))
+
+    def samples_after_reboot(self):
+        return len(self.samples(1)) if len(self.boots()) > 1 else 0
+
+    def seq_gaps(self):
+        """Sequence numbers missing from the received samples (last boot)."""
+        s = self.samples()
+        return sum(b["seq"] - a["seq"] - 1 for a, b in zip(s, s[1:]))
 
     def event_ids(self):
         return [e["id"] for e in self.events()]
