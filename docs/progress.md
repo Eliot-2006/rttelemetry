@@ -37,7 +37,7 @@ hardware measurement.
 ## Emulator notes
 
 - The USART2 model delivers RX bytes at a finite rate that is not tied to the baud rate. FI-05 paces oversize frames at 50 ms each so the backlog drains before the final PING.
-- A Renode HardFault/IWDG/software reset reloads the ELF through the `reset` macro. The ADC feed files keep playing from where they were.
+- A Renode IWDG/software reset reloads the ELF through the `reset` macro (FI-06/07/08/09 rely on this). The fault tests check only the BOOT record and that sampling resumes, not the ADC values after a reset.
 
 ## Decisions
 
