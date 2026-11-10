@@ -40,3 +40,29 @@ test: test-host test-tsan test-py
 
 clean:
 	cmake -E rm -rf build
+
+# --- CI quality gates (PRD §15.4, §21.2, §25) ---
+.PHONY: size-check static-analysis ci-docker test-renode
+
+# Memory budgets + no-heap on every firmware image (run after fw fw-release).
+size-check:
+	$(ENV) && elfs=$$(ls build/fw-debug/src/*.elf build/fw-release/src/*.elf) && \
+	  python tools/size_budget.py $$elfs && \
+	  for e in $$elfs; do scripts/check_no_heap.sh $$e || exit 1; done
+
+CPPCHECK_DIRS = $(wildcard src/core src/app src/drivers)
+static-analysis:
+	cppcheck -q --std=c11 --enable=warning,style,performance,portability --error-exitcode=1 \
+	  --inline-suppr --suppress=missingIncludeSystem '--suppress=*:third_party/*' -D__GNUC__ -D__ARM_ARCH_PROFILE=\'M\' -D__ARM_ARCH_7EM__ -DSTM32F407xx -DHSE_VALUE=8000000U \
+	  -Isrc/core -Isrc/app -Isrc/drivers -Isrc/platform \
+	  -Ithird_party/cmsis-device-f4/Include -Ithird_party/CMSIS_6/CMSIS/Core/Include \
+	  $(CPPCHECK_DIRS)
+
+# Linux CI path in ubuntu:24.04 via Docker (PRD gate G11) without pushing.
+ci-docker:
+	scripts/ci-docker.sh
+
+# All Renode suites: platform gates plus tests/robot/*.robot (results in build/robot).
+ROBOT_SUITES = $(wildcard tests/robot/*.robot)
+test-renode: test-platform
+	$(if $(ROBOT_SUITES),mkdir -p build/robot/suites && $(ENV) && cd build/robot/suites && "$$RENODE_TEST" $(addprefix $(CURDIR)/,$(ROBOT_SUITES)))
