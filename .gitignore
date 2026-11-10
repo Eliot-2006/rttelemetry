@@ -1,0 +1,14 @@
+build/
+.tools/
+__pycache__/
+*.pyc
+.venv/
+tests/fuzz/crash-*
+tests/fuzz/leak-*
+tests/fuzz/timeout-*
+bench/results/**/*.tmp
+log.html
+report.html
+robot_output.xml
+logs/
+snapshots/

@@ -1,0 +1,37 @@
+{
+ "bench": "B-08",
+ "env": "emu",
+ "commit": "f0f20ead",
+ "dirty": false,
+ "toolchain": "arm-none-eabi-gcc (Arm GNU Toolchain 15.2.Rel1 (Build arm-15.86)) 15.2.1 20251203",
+ "renode": "1.17.0",
+ "freertos": "V11.3.3",
+ "python": "3.12.13",
+ "host_os": "Darwin 27.0.0 arm64",
+ "firmware": {
+  "default_rate_hz": 1000,
+  "batch": 10,
+  "baud": 921600,
+  "ring": 128,
+  "pool": 4,
+  "elf": "build/fw-debug/src/telemetry.elf"
+ },
+ "rate_hz": 1000,
+ "seconds": 60,
+ "wire_bytes_by_type": {
+  "BOOT": 116,
+  "SAMPLE_BATCH": 1179118,
+  "IMU_BATCH": 288028,
+  "EVENT": 93,
+  "ACK": 54,
+  "HEALTH": 9150
+ },
+ "sample_batch_bytes_mean": 196.0,
+ "sample_batch_bytes_full": [
+  196
+ ],
+ "calc_sample_batch_bytes": 196,
+ "bytes_per_second_total": 24609,
+ "link_capacity_bytes_per_second": 92160,
+ "link_utilization_pct": 26.7
+}

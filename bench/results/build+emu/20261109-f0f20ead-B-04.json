@@ -1,0 +1,172 @@
+{
+ "bench": "B-04",
+ "env": "build+emu",
+ "commit": "f0f20ead",
+ "dirty": false,
+ "toolchain": "arm-none-eabi-gcc (Arm GNU Toolchain 15.2.Rel1 (Build arm-15.86)) 15.2.1 20251203",
+ "renode": "1.17.0",
+ "freertos": "V11.3.3",
+ "python": "3.12.13",
+ "host_os": "Darwin 27.0.0 arm64",
+ "firmware": {
+  "default_rate_hz": 1000,
+  "batch": 10,
+  "baud": 921600,
+  "ring": 128,
+  "pool": 4,
+  "elf": "build/fw-debug/src/telemetry.elf"
+ },
+ "elf": "build/fw-debug/src/telemetry.elf",
+ "sections": {
+  ".isr_vector": 392,
+  ".text": 32364,
+  ".rodata": 1860,
+  ".ARM": 8,
+  ".init_array": 4,
+  ".fini_array": 4,
+  ".data": 12,
+  ".bss": 8820,
+  ".noinit": 168,
+  ".msp": 2048,
+  ".ccm": 8448
+ },
+ "top20": [
+  {
+   "symbol": "ring_storage",
+   "type": "b",
+   "bytes": 2560
+  },
+  {
+   "symbol": "cmd_stack",
+   "type": "b",
+   "bytes": 1536
+  },
+  {
+   "symbol": "health_stack",
+   "type": "b",
+   "bytes": 1536
+  },
+  {
+   "symbol": "imu_stack",
+   "type": "b",
+   "bytes": 1536
+  },
+  {
+   "symbol": "proc_stack",
+   "type": "b",
+   "bytes": 1536
+  },
+  {
+   "symbol": "tx_stack",
+   "type": "b",
+   "bytes": 1536
+  },
+  {
+   "symbol": "pool",
+   "type": "b",
+   "bytes": 1008
+  },
+  {
+   "symbol": "build_health",
+   "type": "t",
+   "bytes": 1000
+  },
+  {
+   "symbol": "__udivmoddi4",
+   "type": "T",
+   "bytes": 800
+  },
+  {
+   "symbol": "fi_mem",
+   "type": "b",
+   "bytes": 768
+  },
+  {
+   "symbol": "msg_put_health",
+   "type": "T",
+   "bytes": 660
+  },
+  {
+   "symbol": "tx_task",
+   "type": "T",
+   "bytes": 600
+  },
+  {
+   "symbol": "xTaskIncrementTick",
+   "type": "T",
+   "bytes": 552
+  },
+  {
+   "symbol": "xTaskGenericNotify",
+   "type": "T",
+   "bytes": 540
+  },
+  {
+   "symbol": "xTaskResumeAll",
+   "type": "T",
+   "bytes": 520
+  },
+  {
+   "symbol": "rx_storage",
+   "type": "b",
+   "bytes": 512
+  },
+  {
+   "symbol": "table",
+   "type": "r",
+   "bytes": 512
+  },
+  {
+   "symbol": "uxIdleTaskStack.0",
+   "type": "b",
+   "bytes": 512
+  },
+  {
+   "symbol": "i2c_read_reg",
+   "type": "T",
+   "bytes": 508
+  },
+  {
+   "symbol": "vTaskGenericNotifyGiveFromISR",
+   "type": "T",
+   "bytes": 496
+  }
+ ],
+ "stacks_after_1khz_run": {
+  "proc": {
+   "configured_words": 384,
+   "free_min_words": 313,
+   "used_pct": 18.5
+  },
+  "tx": {
+   "configured_words": 384,
+   "free_min_words": 247,
+   "used_pct": 35.7
+  },
+  "cmd": {
+   "configured_words": 384,
+   "free_min_words": 304,
+   "used_pct": 20.8
+  },
+  "health": {
+   "configured_words": 384,
+   "free_min_words": 282,
+   "used_pct": 26.6
+  },
+  "imu": {
+   "configured_words": 384,
+   "free_min_words": 310,
+   "used_pct": 19.3
+  },
+  "idle": {
+   "configured_words": 128,
+   "free_min_words": 106,
+   "used_pct": 17.2
+  }
+ },
+ "msp": {
+  "configured_bytes": 2048,
+  "free_min_bytes": 1752
+ },
+ "heap_bytes": 0
+}
