@@ -32,6 +32,7 @@ static uint8_t payload[FRAME_PAYLOAD_MAX];
 
 static i2c_status_t xfer_read(uint8_t reg, uint8_t *dst, size_t n)
 {
+    // cppcheck-suppress knownConditionTrueFalse ; constant false only in release (no fault injection)
     if (fi_i2c_hook()) return I2C_ERR_NACK;           /* FI-12 */
     return i2c_read_reg(IMU_ADDR, reg, dst, n);
 }
