@@ -53,8 +53,12 @@ def env_info():
     }
 
 
+_ENV = None
+
+
 def save(bench, env, data):
-    info = env_info()
+    global _ENV
+    info = _ENV = _ENV or env_info()  # recorded once, at the first save of the run
     out = RESULTS / env / f"{datetime.date.today():%Y%m%d}-{info['commit']}-{bench}.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps({"bench": bench, "env": env, **info, **data}, indent=1) + "\n")
@@ -87,8 +91,10 @@ def run_emu(steps, scenario="nominal"):
                 lines.append(f"python \"u = monitor.Machine['sysbus.usart2']; [u.WriteChar(x) for x in {b}]\"")
         lines.append("quit")
         resc.write_text("\n".join(lines) + "\n")
-        subprocess.run([os.environ["RENODE_BIN"], "--disable-gui", "--console", "-e", f"include @{resc}"],
-                       capture_output=True, check=True, timeout=7200)
+        r = subprocess.run([os.environ["RENODE_BIN"], "--disable-gui", "--console", "-e", f"include @{resc}"],
+                           capture_output=True, text=True, timeout=7200)
+        if r.returncode:
+            sys.exit(f"Renode exited {r.returncode}:\n" + "\n".join((r.stdout + r.stderr).splitlines()[-30:]))
         return cap.read_bytes()
 
 
@@ -126,13 +132,17 @@ def full_batch_sizes(raw):
     return out
 
 
-def summarize_run(raw):
+def summarize_run(raw, stop_us=None):
+    """stop_us: latency/CPU/HWM come from the last HEALTH before this time (the final stop-and-flush
+    batch waits FLUSH_US by design and is not steady state). Counters come from the final HEALTH."""
     frames, rejects = decode(raw)
     acct = Accounting()
     for f in frames:
         acct.on_frame(f)
     health = [f["payload"] for f in frames if f["name"] == "HEALTH"]
     h = health[-1]
+    hs = [x for x in health if stop_us is None or x["uptime_ms"] * 1000 < stop_us] or health
+    steady = hs[-1]
     samples, l1 = [], []
     for f in frames:
         if f["name"] == "SAMPLE_BATCH":
@@ -146,9 +156,9 @@ def summarize_run(raw):
         "triggered": h["triggered"], "delivered": h["delivered"], "received": acct.received, **drops,
         "zero_loss": not any(drops.values()) and h["triggered"] == acct.received,
         "conservation": acct.check_exact(h),
-        "cpu_load_permille_mean": round(statistics.mean(x["cpu_load_permille"] for x in health[:-1] or health), 1),
-        "l1_max_us_device": h["l1_max_us"], "l2_max_us_device": h["l2_max_us"],
-        "ring_hwm": h["ring_hwm"], "txpool_free_min": h["txpool_free_min"],
+        "cpu_load_permille_mean": round(statistics.mean(x["cpu_load_permille"] for x in hs), 1),
+        "l1_max_us_device": steady["l1_max_us"], "l2_max_us_device": steady["l2_max_us"],
+        "ring_hwm": steady["ring_hwm"], "txpool_free_min": steady["txpool_free_min"],
         "stack_free_min_words": dict(zip(TASKS, h["stack_free_min_words"])), "msp_free_bytes": h["msp_free_bytes"],
         "imu_samples": h["imu_samples"], "imu_dropped": h["imu_dropped"],
         "_l1": l1, "_samples": len(samples),
@@ -165,7 +175,7 @@ def b01_b02_b04_b08(sweep_s):
     rows, one_khz = [], None
     for hz in (250, 500, 1000, 2000, 4000, 8000):
         raw = run_emu([("run", 0.1), ("cmd", "set-rate", hz), ("run", sweep_s)] + STOP_FLUSH)
-        frames, s = summarize_run(raw)
+        frames, s = summarize_run(raw, stop_us=(0.1 + sweep_s) * 1e6)
         if hz == 1000:
             one_khz = (raw, frames, s)
         rows.append({"rate_hz": hz, **{k: v for k, v in s.items() if not k.startswith("_")}})
@@ -231,8 +241,9 @@ def b05(seconds):
 
 
 def b07(seconds):
-    raw = run_emu([("run", seconds)] + STOP_FLUSH)
-    frames, s = summarize_run(raw)
+    # 60 s steps: a single 1800 s RunFor aborted Renode 1.17.0 (SIGABRT) in the first attempt.
+    raw = run_emu([("run", 60)] * int(seconds // 60) + STOP_FLUSH)
+    frames, s = summarize_run(raw, stop_us=seconds * 1e6)
     s.pop("_l1")
     s["samples_received"] = s.pop("_samples")
     save("B-07", "emu", {"rate_hz": 1000, "seconds_virtual": seconds, **s})
