@@ -61,7 +61,6 @@ class AccountingTest(unittest.TestCase):
 
     def test_seq_wrap_and_counter_wrap(self):
         a = Accounting()
-        a._last_seq = -1
         start = 2**32 - 5
         a.on_frame(batch(range(start, start + 10)))
         self.assertEqual(a.order_errors, 0)
