@@ -60,7 +60,7 @@ clean:
 	cmake -E rm -rf build
 
 # --- CI quality gates (PRD §15.4, §21.2, §25) ---
-.PHONY: size-check static-analysis ci-docker test-renode golden demo bench-emu soak
+.PHONY: size-check static-analysis ci-docker test-renode golden demo demo-svg bench-emu soak bench-all results
 
 # Memory budgets + no-heap on every firmware image (run after fw fw-release).
 size-check:
@@ -92,12 +92,22 @@ golden: fw
 # PRD §27: emulated end-to-end demo with a live dashboard (no hardware).
 demo: fw
 	$(ENV) && cd tools && python -m telemetry.demo
+# Rerun the demo, keep its transcript, and redraw docs/img/demo.svg from it.
+demo-svg: fw
+	$(ENV) && cd tools && python -m telemetry.demo --transcript $(CURDIR)/docs/img/demo-transcript.json
+	$(MAKE) results
 
 # Benchmarks (PRD §20.2) without hardware; results in bench/results, report in docs/results.md.
 bench-emu: fw
-	$(ENV) && python bench/bench.py --only B-01,B-05,B-09,B-10,B-11,B-12 && python bench/report.py
+	$(ENV) && python bench/bench.py --only B-01,B-05,B-09,B-10,B-11,B-12
+	$(MAKE) results
 soak: fw
-	$(ENV) && python bench/bench.py --only B-07 && python bench/report.py
+	$(ENV) && python bench/bench.py --only B-07
+	$(MAKE) results
 # Every bench (~45 min, mostly the 30 min soak).
 bench-all: fw
-	$(ENV) && python bench/bench.py && python bench/report.py
+	$(ENV) && python bench/bench.py
+	$(MAKE) results
+# docs/img/*.svg charts and docs/results.md from the latest bench/results (no Renode needed).
+results:
+	python3 bench/figures.py --demo docs/img/demo-transcript.json && python3 bench/report.py
