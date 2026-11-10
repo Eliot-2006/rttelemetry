@@ -11,11 +11,11 @@ hardware measurement.
 | M2 RTOS firmware skeleton (tasks, HEALTH, BOOT, watchdog supervisor) | Done | `tests/robot/telemetry.robot` IT-BOOT-1, IT-HEALTH-1 (G3: HEALTH spacing 1 000 000 µs ± 1 ms) |
 | M3 acquisition, processing, commands, loss accounting | Done | IT-ACQ-1/2/3, IT-CMD-1, IT-ACCT-1, FI-03, FI-04 |
 | M4/M5 fault injection and recovery | Done | `tests/robot/fault.robot`: FI-01, 02, 05, 06, 07, 08, 09, 10, IT-STRESS-1 (60 s virtual at 8 kHz, no reset, exact conservation, stacks ≥ 25 %), IT-RELEASE-1; IT-GOLD-1 (3 runs + golden identical, also across Renode processes) |
-| M6 benchmarks | Pending | |
+| M6 benchmarks | Done for [EMU]/[HOST]/[BUILD] | `bench/bench.py`, `bench/report.py` → `docs/results.md`. B-03 and B-06 need hardware |
 | M7 IMU (P1) | Done (polled, D11) | IT-IMU-1 (200 Hz, values exact at ±4 g / 500 dps), FI-12 (2 NACKs absorbed by retries; 3 → OFFLINE, bus recovery, re-probe after 1 s, ADC path 0 drops). FI-13 is **not applicable**: the polled design has no DRDY to lose, and Renode 1.17.0 models neither DRDY nor `STATUS_REG` |
-| M8 response-time analysis | Tool done | `tools/rta.py`, `docs/scheduling.md` (WCET inputs are placeholders until M6) |
+| M8 response-time analysis | Tool done; inputs are placeholders | `tools/rta.py`, `docs/scheduling.md`. The task set matches the as-built polled IMU. WCETs need silicon (DWT): Renode is not cycle-accurate |
 | M9 hardware-in-the-loop | **Not possible: no hardware** | |
-| M10 docs | Pending | |
+| M10 docs + demo | Done (no video, no tag) | README, `docs/design.md`, `docs/testing.md`, `docs/hardware.md`, `make demo`. A demo video and the `v1.0.0` tag are left to the maintainer |
 
 ## Divergences found after M0 (continuing D10–D13 in `docs/platform-verification.md`)
 
