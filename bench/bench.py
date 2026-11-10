@@ -208,10 +208,12 @@ def b01_b02_b04_b08(sweep_s):
     sections = {l.split()[0]: int(l.split()[1]) for l in size.splitlines()[2:]
                 if l.split() and not l.startswith((".debug", ".comment", ".ARM.attributes", "Total"))}
     syms = []
-    for line in sh("arm-none-eabi-nm", "-S", "--size-sort", "-r", str(ELF)).splitlines():
+    # No --size-sort: it invents sizes for size-less linker symbols (_estack, __msp_limit).
+    for line in sh("arm-none-eabi-nm", "-S", str(ELF)).splitlines():
         p = line.split()
         if len(p) == 4:
             syms.append({"symbol": p[3], "type": p[2], "bytes": int(p[1], 16)})
+    syms.sort(key=lambda x: -x["bytes"])
     stacks = {t: {"configured_words": w, "free_min_words": s["stack_free_min_words"][t],
                   "used_pct": round(100 * (w - s["stack_free_min_words"][t]) / w, 1)}
               for t, w in STACK_WORDS.items()}

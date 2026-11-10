@@ -105,7 +105,8 @@ def b08(d):
     L = LABEL[d["env"]]
     return (f"### B-08 Protocol overhead at 1 kHz\n\n"
             + table(["Metric", "Measured " + L, "`[CALC]` (PRD §12.4)"], [
-                ["SAMPLE_BATCH, 10 samples, on wire", f"{d['sample_batch_bytes_full']} B", f"{d['calc_sample_batch_bytes']} B"],
+                ["SAMPLE_BATCH, 10 samples, on wire", f"{', '.join(map(str, d['sample_batch_bytes_full']))} B",
+                 f"{d['calc_sample_batch_bytes']} B"],
                 ["All frames, bytes/s", d["bytes_per_second_total"], "-"],
                 ["Link utilization at 921600 baud", f"{d['link_utilization_pct']} %", "-"]])
             + "\n\n" + table(["Frame type", "Bytes " + L], sorted(d["wire_bytes_by_type"].items())))
