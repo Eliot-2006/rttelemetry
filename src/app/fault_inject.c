@@ -8,7 +8,7 @@
 
 #if FAULT_INJECTION
 
-static _Atomic uint32_t stall_proc_ms, tx_us_per_byte, dma_isr_delay_us;
+static _Atomic uint32_t stall_proc_ms, tx_us_per_byte, dma_isr_delay_us, i2c_fail_n;
 static _Atomic uint8_t hang_target = 0xFF, pending;        /* pending: one-shot cmd-task faults */
 static _Atomic uint16_t armed;
 
@@ -38,7 +38,8 @@ uint8_t fi_arm(uint8_t id, uint32_t param)
                            atomic_store(&hang_target, (uint8_t)param); break;
     case FAULT_UDF: case FAULT_ASSERT: case FAULT_STACK_OVF:
                            atomic_store(&pending, id); break;
-    default:               return ACK_UNSUPPORTED;     /* e.g. I2C_NACK before M7 */
+    case FAULT_I2C_NACK:      atomic_store(&i2c_fail_n, param); break;   /* next `param` IMU transfers */
+    default:               return ACK_UNSUPPORTED;
     }
     atomic_fetch_or(&armed, (uint16_t)(1u << id));
     log_event(EVT_FI_ARMED, ((uint32_t)id << 24) | (param & 0xFFFFFFu));
@@ -47,7 +48,7 @@ uint8_t fi_arm(uint8_t id, uint32_t param)
 
 void fi_clear(void)
 {
-    atomic_store(&stall_proc_ms, 0); atomic_store(&tx_us_per_byte, 0); atomic_store(&dma_isr_delay_us, 0);
+    atomic_store(&stall_proc_ms, 0); atomic_store(&tx_us_per_byte, 0); atomic_store(&dma_isr_delay_us, 0); atomic_store(&i2c_fail_n, 0);
     atomic_store(&hang_target, 0xFF); atomic_store(&pending, 0); atomic_store(&armed, 0);
 }
 
@@ -66,6 +67,14 @@ void fi_tx_hook(size_t bytes)
 {
     uint32_t us = atomic_load(&tx_us_per_byte) * (uint32_t)bytes;
     if (us) vTaskDelay(pdMS_TO_TICKS((us + 999u) / 1000u));
+}
+
+bool fi_i2c_hook(void)
+{
+    uint32_t n = atomic_load(&i2c_fail_n);
+    while (n && !atomic_compare_exchange_weak(&i2c_fail_n, &n, n - 1u)) {}
+    if (n == 1u) atomic_fetch_and(&armed, (uint16_t)~(1u << FAULT_I2C_NACK));
+    return n != 0u;
 }
 
 void fi_dma_isr_hook(void)

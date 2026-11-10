@@ -152,7 +152,7 @@ constant is 0 or 0xFFFF (PRD D7).
 | o+42 | u32 | imu_samples |
 | o+46 | u32 | imu_dropped |
 | o+50 | u32 | i2c_errors |
-| o+54 | u8 | imu_status |
+| o+54 | u8 | imu_status: 0 not yet probed, 1 ONLINE, 2 OFFLINE (re-probed every 1 s) |
 
 `delivered` counts samples placed into frames handed to the TX task (device side). The host counts
 what it actually received. Conservation (PRD §18): `triggered = delivered + dropped_overrun +

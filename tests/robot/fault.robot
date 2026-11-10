@@ -98,6 +98,41 @@ FI-06 Hung task is reset by the watchdog and named
     Should Be Equal    ${b}[task]    cmd
     Log    telemetry resumed ${t} s after the hang was armed [EMU]
 
+FI-12 I2C NACKs: retried, then offline and recovered
+    Start Telemetry    nominal
+    Run For    0.3
+    Send Command    fi-arm    8    2
+    Run For    0.2
+    Send Command    get-status
+    Run For    0.05
+    Capture
+    ${e}=    Health Value    i2c_errors
+    ${st}=    Health Value    imu_status
+    Should Be Equal As Integers    ${e}    2    two NACKs absorbed by the retries
+    Should Be Equal As Integers    ${st}    1
+    Send Command    fi-arm    8    3
+    Run For    0.1
+    Send Command    get-status
+    Run For    0.05
+    Capture
+    ${st}=    Health Value    imu_status
+    Should Be Equal As Integers    ${st}    2    OFFLINE after 3 failed attempts
+    Event Should Have Occurred    15
+    Run For    1.2
+    Stop And Flush
+    Capture
+    ${st}=    Health Value    imu_status
+    ${e}=    Health Value    i2c_errors
+    Should Be Equal As Integers    ${st}    1    re-probe after 1 s brought it back
+    Should Be Equal As Integers    ${e}    5
+    Event Should Have Occurred    16
+    Should Have Booted Once
+    ${ring}=    Health Value    dropped_ring
+    ${ovr}=    Health Value    dropped_overrun
+    Should Be Equal As Integers    ${ring}    0
+    Should Be Equal As Integers    ${ovr}    0
+    Conservation Should Be Exact
+
 FI-07 Undefined instruction: HardFault with the exact PC
     Start Telemetry    nominal
     Run For    0.3

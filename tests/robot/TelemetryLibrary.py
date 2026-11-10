@@ -280,6 +280,15 @@ class TelemetryLibrary:
         s = self.samples()
         return sum(b["seq"] - a["seq"] - 1 for a, b in zip(s, s[1:]))
 
+    def imu_samples_should_be(self, acc, gyr, temp, min_count):
+        """Every IMU record equals the fed values (LSB); seq contiguous within each boot."""
+        acc, gyr = [int(v) for v in str(acc).split(",")], [int(v) for v in str(gyr).split(",")]
+        s = [x for f in self.frames_of("IMU_BATCH") for x in f["payload"]["samples"]]
+        _check(len(s) >= int(min_count), f"{len(s)} IMU samples < {min_count}")
+        for x in s:
+            _check(x["acc"] == acc and x["gyr"] == gyr and x["temp"] == int(temp), f"IMU record {x}")
+        return len(s)
+
     def event_ids(self):
         return [e["id"] for e in self.events()]
 

@@ -12,7 +12,7 @@ hardware measurement.
 | M3 acquisition, processing, commands, loss accounting | Done | IT-ACQ-1/2/3, IT-CMD-1, IT-ACCT-1, FI-03, FI-04 |
 | M4/M5 fault injection and recovery | Done | `tests/robot/fault.robot`: FI-01, 02, 05, 06, 07, 08, 09, 10, IT-STRESS-1 (60 s virtual at 8 kHz, no reset, exact conservation, stacks ≥ 25 %), IT-RELEASE-1; IT-GOLD-1 (3 runs + golden identical, also across Renode processes) |
 | M6 benchmarks | Pending | |
-| M7 IMU (P1) | Pending | IT-HEALTH-1 stack check needs `imu_task` |
+| M7 IMU (P1) | Done (polled, D11) | IT-IMU-1 (200 Hz, values exact at ±4 g / 500 dps), FI-12 (2 NACKs absorbed by retries; 3 → OFFLINE, bus recovery, re-probe after 1 s, ADC path 0 drops). FI-13 is **not applicable**: the polled design has no DRDY to lose, and Renode 1.17.0 models neither DRDY nor `STATUS_REG` |
 | M8 response-time analysis | Tool done | `tools/rta.py`, `docs/scheduling.md` (WCET inputs are placeholders until M6) |
 | M9 hardware-in-the-loop | **Not possible: no hardware** | |
 | M10 docs | Pending | |
@@ -36,10 +36,14 @@ hardware measurement.
 
 ## Emulator notes
 
+- LSM6DSO: the `Default*` properties are not returned by reads. Values come from `FeedAccelerationSample` / `FeedAngularRateSample` (with a repeat count). The model honors FS_XL/FS_G: 0.5 g at ±4 g reads 4096 LSB, and 250 dps at 500 dps reads 14286 LSB. `BDU` is an unhandled tag.
+
 - The USART2 model delivers RX bytes at a finite rate that is not tied to the baud rate. FI-05 paces oversize frames at 50 ms each so the backlog drains before the final PING.
 - A Renode IWDG/software reset reloads the ELF through the `reset` macro (FI-06/07/08/09 rely on this). The fault tests check only the BOOT record and that sampling resumes, not the ADC values after a reset.
 
 ## Decisions
+
+- `imu_task` builds and sends IMU_BATCH frames itself instead of passing records to `proc_task` through `imu_q` (PRD §10.3). That is one less queue, and the drop accounting is the same (`imu_dropped`). It polls every 5 ms (200 Hz) against the 208 Hz ODR because the tick is 1 ms. `imu_task` is watchdog-monitored. On silicon a 14-byte polled burst busy-waits about 0.4 ms `[CALC]` at priority 6, which goes into the RTA.
 
 - `RESET_COUNTERS` clears diagnostics only (HWMs, latency histogram, L2 max). Loss-accounting counters are never reset, so conservation holds over a whole run.
 - The decoder's exact conservation check runs only after `SET_RATE 0` (stop and flush) followed by `GET_STATUS`. At any other point the PRD §18 in-flight bound is checked instead.

@@ -46,7 +46,7 @@ if(NOT GIT_SHA)
 endif()
 
 add_firmware(telemetry
-  app/main.c app/acq.c app/proc.c app/telemetry.c app/health.c app/uplink.c app/fault_inject.c
+  app/main.c app/acq.c app/proc.c app/telemetry.c app/health.c app/uplink.c app/fault_inject.c app/imu.c
   platform/fault.c)
 target_include_directories(telemetry PRIVATE app)
 target_link_libraries(telemetry PRIVATE freertos core)

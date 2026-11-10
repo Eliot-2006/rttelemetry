@@ -78,7 +78,7 @@ static void build_health(health_t *h)
     h->sample_rate_hz = (uint16_t)atomic_load(&ctr.rate_hz);
     h->sensor_status = atomic_exchange(&ctr.sensor_status, 0);
     h->fault_flags = fi_armed_mask();
-    TaskHandle_t th[TID_COUNT] = { h_proc, h_tx, h_cmd, h_health, NULL, xTaskGetIdleTaskHandle() };
+    TaskHandle_t th[TID_COUNT] = { h_proc, h_tx, h_cmd, h_health, h_imu, xTaskGetIdleTaskHandle() };
     h->n_tasks = TID_COUNT;
     for (unsigned i = 0; i < TID_COUNT; i++)
         h->stack_free_min_words[i] = th[i] ? (uint16_t)uxTaskGetStackHighWaterMark(th[i]) : 0;
@@ -88,6 +88,10 @@ static void build_health(health_t *h)
     h->l1_max_us = l1_hist.max;
     xSemaphoreGive(stats_mutex);
     h->l2_max_us = atomic_load(&ctr.l2_max_us);
+    h->imu_samples = atomic_load(&imu_samples);
+    h->imu_dropped = atomic_load(&imu_dropped);
+    h->i2c_errors = atomic_load(&i2c_errors);
+    h->imu_status = atomic_load(&imu_status);
 }
 
 void health_request_status(void) { xTaskNotifyGive(h_health); }

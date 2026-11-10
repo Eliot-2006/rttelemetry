@@ -81,6 +81,19 @@ IT-CMD-1 Commands
     Ack Should Be    ${0x84}    0
     Boot Should Be    1    reason=1
 
+IT-IMU-1 IMU polled at 200 Hz alongside the ADC path
+    [Documentation]    D11: no DRDY in Renode 1.17.0, so imu_task polls every 5 ms.
+    ...                +-4 g: 8192 LSB/g; 500 dps: 17.5 mdps/LSB; temperature 256 LSB/C from 25 C.
+    Start Telemetry    nominal
+    Run For    2.05
+    Capture
+    Imu Samples Should Be    4096,-2048,8192    571,-1143,14286    1280    380
+    ${st}=    Health Value    imu_status
+    Should Be Equal As Integers    ${st}    1
+    ${d}=    Health Value    imu_dropped
+    Should Be Equal As Integers    ${d}    0
+    Samples Should Match Feed    nominal
+
 IT-ACCT-1 Exact conservation after stop
     Start Telemetry    nominal
     Run For    3

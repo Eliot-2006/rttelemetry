@@ -36,7 +36,7 @@ enum { TID_PROC, TID_TX, TID_CMD, TID_HEALTH, TID_IMU, TID_IDLE, TID_COUNT };
 #define PRIO_TX      4
 #define PRIO_CMD     3
 #define PRIO_HEALTH  2
-#define WDT_MONITORED ((1u << TID_PROC) | (1u << TID_TX) | (1u << TID_CMD))
+#define WDT_MONITORED ((1u << TID_PROC) | (1u << TID_TX) | (1u << TID_CMD) | (1u << TID_IMU))
 
 /* ---- counters (single writer each unless noted; all read by health) ---- */
 typedef struct {
@@ -60,7 +60,7 @@ extern SemaphoreHandle_t stats_mutex;
 extern hist_t l1_hist;
 
 extern ring_t sample_ring, rx_ring;
-extern TaskHandle_t h_proc, h_tx, h_cmd, h_health;
+extern TaskHandle_t h_proc, h_tx, h_cmd, h_health, h_imu;
 
 /* acq.c */
 void acq_start(uint32_t rate_hz);
@@ -82,6 +82,11 @@ void log_event(uint16_t id, uint32_t arg);
 void log_event_isr(uint16_t id, uint32_t arg, BaseType_t *woken);
 void events_init(void);
 void alive(unsigned tid);
+/* imu.c */
+enum { IMU_ABSENT = 0, IMU_ONLINE = 1, IMU_OFFLINE = 2 };
+extern _Atomic uint32_t imu_samples, imu_dropped, i2c_errors;
+extern _Atomic uint8_t imu_status;
+void imu_task(void *arg);
 /* uplink.c */
 void cmd_task(void *arg);
 

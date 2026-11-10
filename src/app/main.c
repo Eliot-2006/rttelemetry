@@ -6,7 +6,7 @@
 counters_t ctr;
 SemaphoreHandle_t stats_mutex;
 hist_t l1_hist;
-TaskHandle_t h_proc, h_tx, h_cmd, h_health;
+TaskHandle_t h_proc, h_tx, h_cmd, h_health, h_imu;
 volatile uint32_t *const rt_counter = &TIM2->CNT;
 
 /* Task stacks live in CCM (CPU-only RAM); TCBs and every DMA buffer stay in SRAM. */
@@ -15,7 +15,8 @@ STACK(proc_stack, 384);
 STACK(tx_stack, 384);
 STACK(cmd_stack, 384);
 STACK(health_stack, 384);
-static StaticTask_t proc_tcb, tx_tcb, cmd_tcb, health_tcb;
+STACK(imu_stack, 384);
+static StaticTask_t proc_tcb, tx_tcb, cmd_tcb, health_tcb, imu_tcb;
 static StaticSemaphore_t stats_mutex_buf;
 
 extern uint32_t __msp_limit;
@@ -52,6 +53,7 @@ int main(void)
     CREATE(tx_task, "tx", PRIO_TX, tx_stack, tx_tcb, h_tx, TID_TX);
     CREATE(cmd_task, "cmd", PRIO_CMD, cmd_stack, cmd_tcb, h_cmd, TID_CMD);
     CREATE(health_task, "health", PRIO_HEALTH, health_stack, health_tcb, h_health, TID_HEALTH);
+    CREATE(imu_task, "imu", PRIO_IMU, imu_stack, imu_tcb, h_imu, TID_IMU);
     vTaskStartScheduler();
     for (;;) {}
 }

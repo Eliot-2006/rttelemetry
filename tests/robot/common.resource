@@ -9,8 +9,8 @@ ${ELF}            ${ROOT}/build/fw-debug/src/telemetry.elf
 # D15: Renode 1.17.0 STM32_Timer raises the update event every ARR ticks (silicon: ARR + 1), so an
 # emulated sample period is 1 us shorter than nominal. Firmware keeps the silicon-correct ARR.
 ${TIM_DT_OFFSET}  1
-# imu_task stack in words (HEALTH order: proc, tx, cmd, health, imu, idle); 0 until M7 creates it.
-${IMU_STACK}      0
+# imu_task stack in words (HEALTH order: proc, tx, cmd, health, imu, idle).
+${IMU_STACK}      384
 ${UPDATE_GOLDEN}  ${False}
 
 *** Keywords ***
@@ -25,6 +25,10 @@ Start Telemetry
     FOR    ${ch}    IN    1    8    16    17
         Execute Command    sysbus.adc1 FeedSample @${ROOT}/renode/data/${scenario}/ch${ch}.dat ${ch} -1
     END
+    # Constant IMU input (0.5, -0.25, 1.0) g, (10, -20, 250) dps, 30 C; enough samples for 500 s at 200 Hz.
+    Execute Command    sysbus.i2c1.imu FeedAccelerationSample 0.5 -0.25 1.0 100000
+    Execute Command    sysbus.i2c1.imu FeedAngularRateSample 10 -20 250 100000
+    Execute Command    sysbus.i2c1.imu Temperature 30
     Execute Command    sysbus.usart2 CreateFileBackend @${CAP} true
 
 Run For
