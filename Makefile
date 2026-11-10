@@ -4,8 +4,10 @@ ENV := . $(TOOLS_DIR)/env.sh
 # libFuzzer needs LLVM clang (Apple clang lacks it): Homebrew LLVM on macOS, system clang on Linux.
 FUZZ_CC ?= $(firstword $(wildcard /opt/homebrew/opt/llvm/bin/clang) clang)
 FUZZ_SECONDS ?= 60
-# Host tests use the same clang: Apple clang 15's ASan aborts at startup on macOS 27.
-HOST_CC ?= $(FUZZ_CC)
+# Apple clang 15's ASan aborts at startup on macOS 27, so on macOS host tests use Homebrew LLVM.
+# Elsewhere CMake honours CC (CI runs a GCC and a Clang pass).
+HOST_CC ?= $(if $(filter Darwin,$(shell uname -s)),$(wildcard /opt/homebrew/opt/llvm/bin/clang))
+HOST_CC_FLAG = $(if $(HOST_CC),-DCMAKE_C_COMPILER=$(HOST_CC))
 JOBS ?= $(shell getconf _NPROCESSORS_ONLN)
 
 .PHONY: bootstrap fw fw-release test-host test-tsan fuzz test-py test-platform test coverage clean
@@ -20,10 +22,10 @@ fw-release:
 	$(ENV) && cmake --preset fw-release >/dev/null && cmake --build build/fw-release -j$(JOBS)
 
 test-host:
-	cmake --preset host -DCMAKE_C_COMPILER=$(HOST_CC) >/dev/null && cmake --build build/host -j$(JOBS) && ctest --test-dir build/host --output-on-failure -LE stress
+	cmake --preset host $(HOST_CC_FLAG) >/dev/null && cmake --build build/host -j$(JOBS) && ctest --test-dir build/host --output-on-failure -LE stress
 
 test-tsan:
-	cmake --preset host-tsan -DCMAKE_C_COMPILER=$(HOST_CC) >/dev/null && cmake --build build/host-tsan -j$(JOBS) && ctest --test-dir build/host-tsan --output-on-failure -L stress
+	cmake --preset host-tsan $(HOST_CC_FLAG) >/dev/null && cmake --build build/host-tsan -j$(JOBS) && ctest --test-dir build/host-tsan --output-on-failure -L stress
 
 fuzz:
 	cmake --preset host-fuzz -DCMAKE_C_COMPILER=$(FUZZ_CC) >/dev/null && cmake --build build/host-fuzz -j$(JOBS)
@@ -58,7 +60,7 @@ clean:
 	cmake -E rm -rf build
 
 # --- CI quality gates (PRD §15.4, §21.2, §25) ---
-.PHONY: size-check static-analysis ci-docker test-renode
+.PHONY: size-check static-analysis ci-docker test-renode golden
 
 # Memory budgets + no-heap on every firmware image (run after fw fw-release).
 size-check:
@@ -80,5 +82,9 @@ ci-docker:
 
 # All Renode suites: platform gates plus tests/robot/*.robot (results in build/robot).
 ROBOT_SUITES = $(wildcard tests/robot/*.robot)
-test-renode: test-platform
+test-renode: test-platform fw-release
 	$(if $(ROBOT_SUITES),mkdir -p build/robot/suites && $(ENV) && cd build/robot/suites && "$$RENODE_TEST" $(addprefix $(CURDIR)/,$(ROBOT_SUITES)))
+
+# Regenerate tests/golden/nominal.jsonl after an intentional firmware change; review the diff.
+golden: fw
+	mkdir -p build/robot/golden && $(ENV) && cd build/robot/golden && "$$RENODE_TEST" $(CURDIR)/tests/robot/telemetry.robot --variable UPDATE_GOLDEN:True

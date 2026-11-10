@@ -24,7 +24,7 @@ extern uint32_t __msp_limit;
 static void msp_paint(void)
 {
     uint32_t *p = &__msp_limit;
-    uint32_t *sp = (uint32_t *)__get_MSP() - 16;    /* stay clear of the current frame */
+    const uint32_t *sp = (const uint32_t *)__get_MSP() - 16;    /* stay clear of the current frame */
     while (p < sp) *p++ = 0xA5A5A5A5u;
 }
 

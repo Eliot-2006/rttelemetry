@@ -33,6 +33,8 @@ void adc_init(void)
     NVIC_EnableIRQ(DMA2_Stream0_IRQn);
 }
 
+/* dst is written by DMA, not by this code: const would be misleading. */
+// cppcheck-suppress constParameterPointer
 void adc_start_scan(volatile uint32_t *dst)
 {
     DMA2->LIFCR = S0_FLAGS;

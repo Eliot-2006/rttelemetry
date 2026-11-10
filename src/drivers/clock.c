@@ -2,7 +2,7 @@
 
 #define SPIN_LIMIT 1000000u
 
-static bool wait_set(volatile uint32_t *reg, uint32_t mask, uint32_t want)
+static bool wait_set(const volatile uint32_t *reg, uint32_t mask, uint32_t want)
 {
     for (uint32_t i = 0; i < SPIN_LIMIT; i++) {
         if ((*reg & mask) == want) return true;

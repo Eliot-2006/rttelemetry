@@ -5,7 +5,7 @@ Usage: size_budget.py [--budgets FILE] IMAGE...
 IMAGE is an .elf (sized with `arm-none-eabi-size -A -d`) or a saved `*.size.txt` of that output.
 Sections are assigned to regions by address, so new sections (.dma_ram, ...) are counted
 without edits here. .data also counts toward flash (its initializers live there).
-The MSP reserve is reported on its own line and not counted in SRAM.
+The 2 KiB MSP stack (.msp) sits in CCM and counts toward the CCM budget (PRD §15.2).
 Exit status 1 if any region exceeds its budget.
 """
 import argparse
@@ -19,8 +19,6 @@ REGIONS = {  # name: (base, length) from src/platform/stm32f407vg.ld
     "sram": (0x20000000, 128 * 1024),
     "ccm": (0x10000000, 64 * 1024),
 }
-MSP_SECTION = "._msp_reserve"
-
 
 def parse(text):
     """`size -A -d` output -> {section: (size, addr)}."""
@@ -34,11 +32,7 @@ def parse(text):
 
 def usage(sections):
     used = dict.fromkeys(REGIONS, 0)
-    used["msp_reserve"] = 0
     for name, (size, addr) in sections.items():
-        if name == MSP_SECTION:
-            used["msp_reserve"] += size
-            continue
         for region, (base, length) in REGIONS.items():
             if base <= addr < base + length:
                 used[region] += size
@@ -83,7 +77,6 @@ def main(argv=None):
             pct = 100.0 * used[region] / limits[region]
             print(f"{path:<44} {region:<12} {used[region]:>8} {limits[region]:>8} {pct:>5.1f}%"
                   + ("  OVER BUDGET" if over else ""))
-        print(f"{path:<44} {'msp_reserve':<12} {used['msp_reserve']:>8} {'-':>8}")
     return 0 if ok else 1
 
 

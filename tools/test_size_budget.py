@@ -19,8 +19,8 @@ section            size        addr
 .data                 4   536870912
 .bss                272   536870916
 .noinit               4   536871188
-._msp_reserve      2048   536871192
-.ccm               1024   268435456
+.msp               2048   268435456
+.ccm               1024   268437504
 .ARM.attributes      48           0
 .debug_info       17370           0
 Total             49780
@@ -32,8 +32,7 @@ class SizeBudgetTest(unittest.TestCase):
         used = size_budget.usage(size_budget.parse(SAMPLE))
         self.assertEqual(used["flash"], 392 + 5936 + 520 + 8 + 4 + 4 + 4)
         self.assertEqual(used["sram"], 4 + 272 + 4)
-        self.assertEqual(used["ccm"], 1024)
-        self.assertEqual(used["msp_reserve"], 2048)
+        self.assertEqual(used["ccm"], 2048 + 1024)  # MSP stack counts toward CCM
 
     def run_main(self, budgets):
         with tempfile.TemporaryDirectory() as d:
