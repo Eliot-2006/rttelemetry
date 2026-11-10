@@ -88,3 +88,11 @@ values are guesses. No measured numbers exist yet. To replace them:
 
 Measured execution times are maxima from a finite run, not proven WCETs. Treat
 the result as evidence, not as proof.
+
+## As built (M7)
+
+The IMU is polled (D11): `imu_task` runs every 5 ms at priority 6 and busy-waits on a 14-byte I²C
+burst, about 400 µs at 400 kHz `[CALC]`. The task set models that, with no EXTI or I²C interrupts.
+Every WCET is still a placeholder. Renode is not cycle-accurate (D8), so emulated execution times
+would not give meaningful WCETs. Measured values need hardware (DWT cycle counter), see
+`docs/hardware.md`.

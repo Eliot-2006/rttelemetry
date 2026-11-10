@@ -42,5 +42,7 @@ jobs:
           if-no-files-found: ignore
           path: |
             build/robot/**
+            bench/results/**
+            docs/results.md
             crash-*
             bench/results/**

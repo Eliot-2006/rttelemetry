@@ -60,7 +60,7 @@ clean:
 	cmake -E rm -rf build
 
 # --- CI quality gates (PRD §15.4, §21.2, §25) ---
-.PHONY: size-check static-analysis ci-docker test-renode golden
+.PHONY: size-check static-analysis ci-docker test-renode golden demo bench-emu soak
 
 # Memory budgets + no-heap on every firmware image (run after fw fw-release).
 size-check:
@@ -88,3 +88,13 @@ test-renode: test-platform fw-release
 # Regenerate tests/golden/nominal.jsonl after an intentional firmware change; review the diff.
 golden: fw
 	mkdir -p build/robot/golden && $(ENV) && cd build/robot/golden && "$$RENODE_TEST" $(CURDIR)/tests/robot/telemetry.robot --variable UPDATE_GOLDEN:True
+
+# PRD §27: emulated end-to-end demo with a live dashboard (no hardware).
+demo: fw
+	$(ENV) && cd tools && python -m telemetry.demo
+
+# Benchmarks (PRD §20.2) without hardware; results in bench/results, report in docs/results.md.
+bench-emu: fw
+	$(ENV) && python bench/bench.py --only B-01,B-05,B-09 && python bench/report.py
+soak: fw
+	$(ENV) && python bench/bench.py --only B-07 && python bench/report.py

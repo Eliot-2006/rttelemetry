@@ -1,27 +1,81 @@
 {
-  "_comment": "Production task set, PRD §8.1 tasks + §7.1 ISRs at 1 kHz sampling, batch 10. ALL wcet_us AND blocking_us VALUES ARE PLACEHOLDERS (ISR values are the PRD §7.1 budgets, task values are guesses) -- replace with measured maxima from the M8 job instrumentation ([EMU]) and M9 ([HW]). Priorities, periods and deadlines come from the PRD. Entries with \"optional\": true are the P1 IMU path; include them with --include-optional.",
-  "tick_us": 1000,
-  "tasks": [
-    {"name": "imu_task", "prio": 6, "period_us": 4807, "deadline_us": 4800, "wcet_us": 200, "blocking_us": 20, "optional": true,
-     "_note": "208 Hz DRDY; period rounded down (conservative); deadline = next DRDY overwrites data"},
-    {"name": "proc_task", "prio": 5, "period_us": 1000, "deadline_us": 118000, "wcet_us": 100, "blocking_us": 20,
-     "_note": "woken per DMA-complete (1 kHz); PRD §16.3 per-batch budget charged every ms as a conservative placeholder"},
-    {"name": "tx_task", "prio": 4, "period_us": 10000, "deadline_us": 30000, "wcet_us": 50, "blocking_us": 20,
-     "_note": "one frame per batch of 10 at 1 kHz"},
-    {"name": "cmd_task", "prio": 3, "period_us": 100000, "deadline_us": 100000, "wcet_us": 200, "blocking_us": 20,
-     "_note": "sporadic; assumed minimum inter-arrival = 100 ms timeout period"},
-    {"name": "health_task", "prio": 2, "period_us": 100000, "deadline_us": 100000, "wcet_us": 500, "blocking_us": 0,
-     "_note": "lowest priority, so no lower-priority blocking"}
-  ],
-  "isrs": [
-    {"name": "TIM3_trigger", "period_us": 1000, "wcet_us": 1},
-    {"name": "DMA2_S0_adc", "period_us": 1000, "wcet_us": 3},
-    {"name": "SysTick", "period_us": 1000, "wcet_us": 5, "_note": "tick_us; no PRD budget, placeholder"},
-    {"name": "EXTI_imu_drdy", "period_us": 4807, "wcet_us": 1, "optional": true},
-    {"name": "I2C1_ev_er", "period_us": 4807, "wcet_us": 48, "optional": true,
-     "_note": "~16 EV/ER interrupts per burst read x 3 us budget, lumped per DRDY"},
-    {"name": "DMA1_S6_uart_tx", "period_us": 10000, "wcet_us": 2},
-    {"name": "USART2_rx", "period_us": 1000, "wcet_us": 2,
-     "_note": "assumes uplink <= 1 byte/ms; a back-to-back burst at 921600 baud is one byte per ~10.9 us -- revisit"}
-  ]
+ "_comment": "Production task set, PRD §8.1 tasks + §7.1 ISRs at 1 kHz sampling, batch 10. ALL wcet_us AND blocking_us VALUES ARE PLACEHOLDERS (ISR values are the PRD §7.1 budgets, task values are guesses) -- replace with measured maxima from the M8 job instrumentation ([EMU]) and M9 ([HW]). Priorities, periods and deadlines come from the PRD. Entries with \"optional\": true are the P1 IMU path; include them with --include-optional.",
+ "tick_us": 1000,
+ "tasks": [
+  {
+   "name": "imu_task",
+   "prio": 6,
+   "period_us": 5000,
+   "deadline_us": 5000,
+   "wcet_us": 450,
+   "blocking_us": 20,
+   "optional": true,
+   "_note": "polled every 5 ms (D11: no DRDY in Renode); 14-byte polled I2C burst at 400 kHz busy-waits ~400 us [CALC] + processing; placeholder until measured"
+  },
+  {
+   "name": "proc_task",
+   "prio": 5,
+   "period_us": 1000,
+   "deadline_us": 118000,
+   "wcet_us": 100,
+   "blocking_us": 20,
+   "_note": "woken per DMA-complete (1 kHz); PRD §16.3 per-batch budget charged every ms as a conservative placeholder"
+  },
+  {
+   "name": "tx_task",
+   "prio": 4,
+   "period_us": 10000,
+   "deadline_us": 30000,
+   "wcet_us": 50,
+   "blocking_us": 20,
+   "_note": "one frame per batch of 10 at 1 kHz"
+  },
+  {
+   "name": "cmd_task",
+   "prio": 3,
+   "period_us": 100000,
+   "deadline_us": 100000,
+   "wcet_us": 200,
+   "blocking_us": 20,
+   "_note": "sporadic; assumed minimum inter-arrival = 100 ms timeout period"
+  },
+  {
+   "name": "health_task",
+   "prio": 2,
+   "period_us": 100000,
+   "deadline_us": 100000,
+   "wcet_us": 500,
+   "blocking_us": 0,
+   "_note": "lowest priority, so no lower-priority blocking"
+  }
+ ],
+ "isrs": [
+  {
+   "name": "TIM3_trigger",
+   "period_us": 1000,
+   "wcet_us": 1
+  },
+  {
+   "name": "DMA2_S0_adc",
+   "period_us": 1000,
+   "wcet_us": 3
+  },
+  {
+   "name": "SysTick",
+   "period_us": 1000,
+   "wcet_us": 5,
+   "_note": "tick_us; no PRD budget, placeholder"
+  },
+  {
+   "name": "DMA1_S6_uart_tx",
+   "period_us": 10000,
+   "wcet_us": 2
+  },
+  {
+   "name": "USART2_rx",
+   "period_us": 1000,
+   "wcet_us": 2,
+   "_note": "assumes uplink <= 1 byte/ms; a back-to-back burst at 921600 baud is one byte per ~10.9 us -- revisit"
+  }
+ ]
 }
