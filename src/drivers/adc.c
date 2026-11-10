@@ -44,6 +44,20 @@ void adc_start_scan(volatile uint32_t *dst)
     ADC1->CR2 |= ADC_CR2_SWSTART;
 }
 
+/* Silicon: ADC OVR blocks further DMA requests until the DMA and ADC are re-armed (RM0090 §13.8.1).
+ * Renode 1.17.0: a reset that lands mid-scan leaves the ADC-to-DMA request state stale (D16).
+ * Clearing ADON stops the conversion and rewinds the sequencer; SR = 0 clears OVR/EOC. */
+bool adc_abort_stalled_scan(void)
+{
+    if (ADC_STREAM->NDTR == 0u) return false;
+    ADC_STREAM->CR &= ~DMA_SxCR_EN;
+    while (ADC_STREAM->CR & DMA_SxCR_EN) {}
+    ADC1->CR2 &= ~ADC_CR2_ADON;
+    ADC1->SR = 0;
+    ADC1->CR2 |= ADC_CR2_ADON;
+    return true;
+}
+
 bool adc_dma_take_complete(void)
 {
     bool done = (DMA2->LISR & DMA_LISR_TCIF0) != 0u;

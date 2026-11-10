@@ -32,6 +32,7 @@ hardware measurement.
 - The MSP high-water mark overflowed `u16`, because the MSP spanned all free SRAM. The MSP is now 2 KiB at the bottom of CCM, as PRD §15.2 specifies: overflow runs off `0x10000000` and faults instead of corrupting data.
 - FI-02 found that the EVENT frame carrying `TXPOOL_EMPTY_ON` was itself dropped by the empty pool. A pending EVENT batch is now retried on the next health slot. `frames_dropped` counts refused send attempts.
 - FI-05: the deframer's oversize discards were not counted anywhere. They now count as `rx_frames_bad`. The RX ring grew to 512 B, and the ISR also wakes `cmd_task` at half-full.
+- **Acquisition stopped for good after some watchdog resets.** Found while building the recovery benchmark (B-11). A hang armed between 0.90 and 1.00 s makes the IWDG reset land mid-scan. After reboot the first scan stopped after one DMA transfer (D16), `in_flight` stayed set, and every later sample was counted as an overrun. Accounting stayed exact, but delivery was zero. FI-06 passed only because it arms the hang at 0.5 s. Fix: TIM3 aborts and re-arms a scan that is still in flight after 2 ms with DMA transfers outstanding. That is also the silicon recovery for ADC OVR. Regression test: FI-06b. A sweep of 20 injection times from 0.90 to 1.09 s now recovers every time; the reset costs at most 3 counted samples.
 - Apple clang 15 ASan aborts at startup on macOS 27, even on an empty `main`. The host tests now build with LLVM clang (`HOST_CC` in the Makefile).
 
 ## Emulator notes

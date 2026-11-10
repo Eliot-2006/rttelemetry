@@ -98,6 +98,22 @@ FI-06 Hung task is reset by the watchdog and named
     Should Be Equal    ${b}[task]    cmd
     Log    telemetry resumed ${t} s after the hang was armed [EMU]
 
+FI-06b Watchdog reset during an in-flight ADC scan
+    [Documentation]    Armed at 1.0 s, the IWDG reset lands mid-scan (1.9998 s virtual). Renode keeps the
+    ...                ADC-to-DMA request state across the reset (D16), so the first scan after boot stops
+    ...                short. The TIM3 scan timeout must abort it, count it as an overrun, and restart.
+    Start Telemetry    nominal
+    Run For    1.0
+    Send Command    fi-arm    3    2
+    ${t}=    Run Until Samples After Reboot    2.0
+    Run For    1.0
+    Stop And Flush
+    Capture
+    Boot Should Be    1    reason=2
+    ${ovr}=    Health Value    dropped_overrun
+    Should Be True    ${ovr} <= 3    ${ovr} overruns after the reset
+    Conservation Should Be Exact
+
 FI-12 I2C NACKs: retried, then offline and recovered
     Start Telemetry    nominal
     Run For    0.3

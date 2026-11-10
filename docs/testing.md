@@ -58,6 +58,7 @@ Python oracle, sample by sample.
 | FI-03 / FI-04 / roc | RANGE, STUCK onset (sample 449), ROC flags on exactly the expected samples | pass |
 | FI-05 | 1000 malformed frames: `rx_frames_bad` = 800 and 200 error ACKs exactly, then PING OK, no reset | pass |
 | FI-06 | Hung `cmd_task` → IWDG reset, BOOT reason WDT_TASK_STALL naming `cmd`, samples again ≤ 2 s | pass |
+| FI-06b | Same hang, armed so the reset lands mid-scan (D16): the stalled scan is aborted, ≤ 3 overruns, exact conservation | pass |
 | FI-07 | `UDF` → HardFault, BOOT PC equals the `fi_udf_site` symbol, CFSR = UNDEFINSTR | pass |
 | FI-08 | Stack overflow in the sacrificial `fi` task → reason STACK_OVF, task `fi` | pass |
 | FI-09 | `configASSERT` → reason ASSERT, file and line match the source | pass |
