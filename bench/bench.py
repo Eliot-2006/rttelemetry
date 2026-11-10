@@ -91,7 +91,7 @@ def run_emu(steps, scenario="nominal"):
                 lines.append(f"python \"u = monitor.Machine['sysbus.usart2']; [u.WriteChar(x) for x in {b}]\"")
         lines.append("quit")
         resc.write_text("\n".join(lines) + "\n")
-        r = subprocess.run([os.environ["RENODE_BIN"], "--disable-gui", "--console", "-e", f"include @{resc}"],
+        r = subprocess.run([os.environ["RENODE_BIN"], "--disable-gui", "-P", "-1", "-e", f"include @{resc}"],
                            capture_output=True, text=True, timeout=7200)
         if r.returncode:
             sys.exit(f"Renode exited {r.returncode}:\n" + "\n".join((r.stdout + r.stderr).splitlines()[-30:]))
@@ -241,7 +241,8 @@ def b05(seconds):
 
 
 def b07(seconds):
-    # 60 s steps: a single 1800 s RunFor aborted Renode 1.17.0 (SIGABRT) in the first attempt.
+    # 60 s steps keep each RunFor short. The earlier SIGABRT was Renode's --console stdin reader
+    # (SemaphoreFullException after ~12 min wall time with stdin at EOF), fixed in run_emu by -P -1.
     raw = run_emu([("run", 60)] * int(seconds // 60) + STOP_FLUSH)
     frames, s = summarize_run(raw, stop_us=seconds * 1e6)
     s.pop("_l1")
