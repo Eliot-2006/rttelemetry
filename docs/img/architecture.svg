@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="940" height="492" viewBox="0 0 940 492" role="img" aria-labelledby="t d" font-family='-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif'>
+<title id="t">RTTelemetry data path</title><desc id="d">Data path: TIM3 ISR starts an ADC1 scan via DMA2; the DMA ISR pushes a sample record into a lock-free SPSC ring; proc_task batches into a fixed frame pool shared with imu_task, health_task and cmd_task; tx_task encodes and sends over USART2 by DMA to the host decoder. Commands return through the USART2 RX ISR to cmd_task. Drops are counted at the ADC trigger, the ring and the frame pool; the host detects link loss.</desc>
+<style>.bg{fill:#fcfcfb;stroke:rgba(11,11,11,0.10)}.t1{fill:#0b0b0b}.t2{fill:#52514e}.t3{fill:#6f6d68}.grid{stroke:#e1e0d9}.axis{stroke:#c3c2b7}.ref{stroke:#52514e}.s1{fill:#2a78d6}.ks1{stroke:#2a78d6}.ws1{fill:#2a78d6;fill-opacity:.16}.s2{fill:#eb6834}.ks2{stroke:#eb6834}.ws2{fill:#eb6834;fill-opacity:.16}.s3{fill:#1baf7a}.ks3{stroke:#1baf7a}.ws3{fill:#1baf7a;fill-opacity:.16}.s4{fill:#eda100}.ks4{stroke:#eda100}.ws4{fill:#eda100;fill-opacity:.16}.wn{fill:#0b0b0b;fill-opacity:.05}.ring{stroke:#fcfcfb}@media (prefers-color-scheme:dark){.bg{fill:#1a1a19;stroke:rgba(255,255,255,0.10)}.t1{fill:#f0efec}.t2{fill:#c3c2b7}.t3{fill:#a3a29b}.grid{stroke:#2c2c2a}.axis{stroke:#383835}.ref{stroke:#c3c2b7}.s1{fill:#3987e5}.ks1{stroke:#3987e5}.ws1{fill:#3987e5;fill-opacity:.16}.s2{fill:#d95926}.ks2{stroke:#d95926}.ws2{fill:#d95926;fill-opacity:.16}.s3{fill:#199e70}.ks3{stroke:#199e70}.ws3{fill:#199e70;fill-opacity:.16}.s4{fill:#c98500}.ks4{stroke:#c98500}.ws4{fill:#c98500;fill-opacity:.16}.wn{fill:#ffffff;fill-opacity:.05}.ring{stroke:#1a1a19}}</style>
+<rect x="0.5" y="0.5" width="939.0" height="491.0" rx="8" class="bg"/>
+<text x="24.0" y="34.0" class="t1" font-size="15" text-anchor="start" font-weight="600">RTTelemetry data path</text>
+<text x="24.0" y="54.0" class="t2" font-size="12" text-anchor="start" font-weight="400">STM32F407 + FreeRTOS. The same firmware image runs unmodified in Renode.</text>
+<defs><marker id="ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L8,4L0,8z" class="t2"/></marker></defs>
+<rect x="24.0" y="71.0" width="10.0" height="10.0" rx="2" class="ws4 ks4"/>
+<text x="39.0" y="80.0" class="t2" font-size="12" text-anchor="start" font-weight="400">interrupt handler</text>
+<rect x="166.2" y="71.0" width="10.0" height="10.0" rx="2" class="ws1 ks1"/>
+<text x="181.2" y="80.0" class="t2" font-size="12" text-anchor="start" font-weight="400">FreeRTOS task</text>
+<rect x="282.0" y="71.0" width="10.0" height="10.0" rx="2" class="ws3 ks3"/>
+<text x="297.0" y="80.0" class="t2" font-size="12" text-anchor="start" font-weight="400">shared buffer</text>
+<rect x="397.8" y="71.0" width="10.0" height="10.0" rx="2" class="wn axis"/>
+<text x="412.8" y="80.0" class="t2" font-size="12" text-anchor="start" font-weight="400">peripheral / host</text>
+<path d="M540.0,71.0l4,4l-4,4l-4,-4z" class="s2"/>
+<text x="550.0" y="80.0" class="t2" font-size="11" text-anchor="start" font-weight="400">counted drop point</text>
+<rect x="24.0" y="104.0" width="156.0" height="52.0" rx="6" class="ws4 ks4" stroke-width="1.5"/>
+<text x="36.0" y="126.0" class="t1" font-size="13" text-anchor="start" font-weight="600">TIM3 update ISR</text>
+<text x="36.0" y="144.0" class="t2" font-size="11" text-anchor="start" font-weight="400">prio 4 · stamps t_us</text>
+<rect x="208.0" y="104.0" width="156.0" height="52.0" rx="6" class="wn axis" stroke-width="1.5"/>
+<text x="220.0" y="126.0" class="t1" font-size="13" text-anchor="start" font-weight="600">ADC1 scan + DMA2</text>
+<text x="220.0" y="144.0" class="t2" font-size="11" text-anchor="start" font-weight="400">4 channels, Stream0</text>
+<rect x="392.0" y="104.0" width="156.0" height="52.0" rx="6" class="ws4 ks4" stroke-width="1.5"/>
+<text x="404.0" y="126.0" class="t1" font-size="13" text-anchor="start" font-weight="600">DMA2 TC ISR</text>
+<text x="404.0" y="144.0" class="t2" font-size="11" text-anchor="start" font-weight="400">prio 5 · builds record</text>
+<rect x="576.0" y="104.0" width="156.0" height="52.0" rx="6" class="ws3 ks3" stroke-width="1.5"/>
+<text x="588.0" y="126.0" class="t1" font-size="13" text-anchor="start" font-weight="600">SPSC ring</text>
+<text x="588.0" y="144.0" class="t2" font-size="11" text-anchor="start" font-weight="400">128 records, lock-free</text>
+<rect x="760.0" y="104.0" width="156.0" height="52.0" rx="6" class="ws1 ks1" stroke-width="1.5"/>
+<text x="772.0" y="126.0" class="t1" font-size="13" text-anchor="start" font-weight="600">proc_task</text>
+<text x="772.0" y="144.0" class="t2" font-size="11" text-anchor="start" font-weight="400">prio 5 · flags, batch 10</text>
+<path d="M180.0,130.0L206.0,130.0" class="ref" fill="none" stroke-width="1.5" marker-end="url(#ah)"/>
+<path d="M364.0,130.0L390.0,130.0" class="ref" fill="none" stroke-width="1.5" marker-end="url(#ah)"/>
+<path d="M548.0,130.0L574.0,130.0" class="ref" fill="none" stroke-width="1.5" marker-end="url(#ah)"/>
+<path d="M732.0,130.0L758.0,130.0" class="ref" fill="none" stroke-width="1.5" marker-end="url(#ah)"/>
+<path d="M28.0,165.0l4,4l-4,4l-4,-4z" class="s2"/>
+<text x="38.0" y="174.0" class="t2" font-size="11" text-anchor="start" font-weight="400">dropped_overrun: scan still busy</text>
+<path d="M580.0,165.0l4,4l-4,4l-4,-4z" class="s2"/>
+<text x="590.0" y="174.0" class="t2" font-size="11" text-anchor="start" font-weight="400">dropped_ring: ring full</text>
+<rect x="760.0" y="244.0" width="156.0" height="52.0" rx="6" class="ws3 ks3" stroke-width="1.5"/>
+<text x="772.0" y="266.0" class="t1" font-size="13" text-anchor="start" font-weight="600">Frame pool</text>
+<text x="772.0" y="284.0" class="t2" font-size="11" text-anchor="start" font-weight="400">4 frames, never blocks</text>
+<rect x="576.0" y="244.0" width="156.0" height="52.0" rx="6" class="ws1 ks1" stroke-width="1.5"/>
+<text x="588.0" y="266.0" class="t1" font-size="13" text-anchor="start" font-weight="600">tx_task</text>
+<text x="588.0" y="284.0" class="t2" font-size="11" text-anchor="start" font-weight="400">prio 4 · COBS + CRC-16</text>
+<rect x="392.0" y="244.0" width="156.0" height="52.0" rx="6" class="wn axis" stroke-width="1.5"/>
+<text x="404.0" y="266.0" class="t1" font-size="13" text-anchor="start" font-weight="600">USART2 TX</text>
+<text x="404.0" y="284.0" class="t2" font-size="11" text-anchor="start" font-weight="400">DMA1 S6 · 921600 baud</text>
+<rect x="24.0" y="244.0" width="340.0" height="52.0" rx="6" class="wn axis" stroke-width="1.5"/>
+<text x="36.0" y="266.0" class="t1" font-size="13" text-anchor="start" font-weight="600">Host decoder (Python)</text>
+<text x="36.0" y="284.0" class="t2" font-size="11" text-anchor="start" font-weight="400">CRC, seq gaps, conservation check</text>
+<path d="M838.0,156.0L838.0,242.0" class="ref" fill="none" stroke-width="1.5" marker-end="url(#ah)"/>
+<path d="M654.8,195.0l4,4l-4,4l-4,-4z" class="s2"/>
+<text x="664.8" y="204.0" class="t2" font-size="11" text-anchor="start" font-weight="400">dropped_txpool: pool empty</text>
+<path d="M760.0,270.0L734.0,270.0" class="ref" fill="none" stroke-width="1.5" marker-end="url(#ah)"/>
+<path d="M576.0,270.0L550.0,270.0" class="ref" fill="none" stroke-width="1.5" marker-end="url(#ah)"/>
+<path d="M392.0,270.0L366.0,270.0" class="ref" fill="none" stroke-width="1.5" marker-end="url(#ah)"/>
+<path d="M28.0,305.0l4,4l-4,4l-4,-4z" class="s2"/>
+<text x="38.0" y="314.0" class="t2" font-size="11" text-anchor="start" font-weight="400">link loss: CRC rejects, missing seq</text>
+<rect x="208.0" y="384.0" width="156.0" height="52.0" rx="6" class="ws4 ks4" stroke-width="1.5"/>
+<text x="220.0" y="406.0" class="t1" font-size="13" text-anchor="start" font-weight="600">USART2 RX ISR</text>
+<text x="220.0" y="424.0" class="t2" font-size="11" text-anchor="start" font-weight="400">bytes into rx_ring</text>
+<rect x="392.0" y="384.0" width="156.0" height="52.0" rx="6" class="ws1 ks1" stroke-width="1.5"/>
+<text x="404.0" y="406.0" class="t1" font-size="13" text-anchor="start" font-weight="600">cmd_task</text>
+<text x="404.0" y="424.0" class="t2" font-size="11" text-anchor="start" font-weight="400">prio 3 · parse, ACK</text>
+<rect x="576.0" y="384.0" width="156.0" height="52.0" rx="6" class="ws1 ks1" stroke-width="1.5"/>
+<text x="588.0" y="406.0" class="t1" font-size="13" text-anchor="start" font-weight="600">imu_task</text>
+<text x="588.0" y="424.0" class="t2" font-size="11" text-anchor="start" font-weight="400">prio 6 · IMU at 200 Hz</text>
+<rect x="760.0" y="384.0" width="156.0" height="52.0" rx="6" class="ws1 ks1" stroke-width="1.5"/>
+<text x="772.0" y="406.0" class="t1" font-size="13" text-anchor="start" font-weight="600">health_task</text>
+<text x="772.0" y="424.0" class="t2" font-size="11" text-anchor="start" font-weight="400">prio 2 · HEALTH, watchdog</text>
+<path d="M286.0,296.0L286.0,382.0" class="ref" fill="none" stroke-width="1.5" marker-end="url(#ah)"/>
+<text x="294.0" y="342.0" class="t3" font-size="11" text-anchor="start" font-weight="400">commands</text>
+<path d="M364.0,410.0L390.0,410.0" class="ref" fill="none" stroke-width="1.5" marker-end="url(#ah)"/>
+<line x1="470.0" y1="384.0" x2="470.0" y2="340.0" class="ref" stroke-width="1.5"/>
+<line x1="654.0" y1="384.0" x2="654.0" y2="340.0" class="ref" stroke-width="1.5"/>
+<line x1="470.0" y1="340.0" x2="838.0" y2="340.0" class="ref" stroke-width="1.5"/>
+<path d="M838.0,384.0L838.0,298.0" class="ref" fill="none" stroke-width="1.5" marker-end="url(#ah)"/>
+<text x="24.0" y="470.0" class="t2" font-size="12" text-anchor="start" font-weight="400">Every drop point has its own counter, reported in each HEALTH frame. The host checks triggered = delivered + dropped + in flight.</text>
+</svg>

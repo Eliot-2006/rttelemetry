@@ -1,0 +1,52 @@
+{
+ "bench": "B-09",
+ "env": "host",
+ "commit": "40008df3",
+ "dirty": false,
+ "toolchain": "arm-none-eabi-gcc (Arm GNU Toolchain 15.2.Rel1 (Build arm-15.86)) 15.2.1 20251203",
+ "renode": "1.17.0",
+ "freertos": "V11.3.3",
+ "python": "3.12.13",
+ "host_os": "Darwin 27.0.0 arm64",
+ "firmware": {
+  "default_rate_hz": 1000,
+  "batch": 10,
+  "baud": 921600,
+  "ring": 128,
+  "pool": 4,
+  "elf": "build/fw-debug/src/telemetry.elf"
+ },
+ "stream": "first 200 frames of a 1.2 s nominal capture",
+ "seed": 1,
+ "results": {
+  "1bit": {
+   "trials": 25000,
+   "undetected": 0,
+   "detection_rate": 1.0,
+   "target_frame_lost": 25000,
+   "neighbour_frames_lost": 130
+  },
+  "2bit": {
+   "trials": 25000,
+   "undetected": 0,
+   "detection_rate": 1.0,
+   "target_frame_lost": 25000,
+   "neighbour_frames_lost": 249
+  },
+  "3bit": {
+   "trials": 25000,
+   "undetected": 0,
+   "detection_rate": 1.0,
+   "target_frame_lost": 25000,
+   "neighbour_frames_lost": 366
+  },
+  "burst<=16": {
+   "trials": 25000,
+   "undetected": 0,
+   "detection_rate": 1.0,
+   "target_frame_lost": 25000,
+   "neighbour_frames_lost": 115
+  }
+ },
+ "note": "neighbour loss happens only when a flip creates or destroys a 0x00 delimiter"
+}

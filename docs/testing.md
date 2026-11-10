@@ -14,7 +14,8 @@ make fuzz             # libFuzzer, 60 s per target (FUZZ_SECONDS=...)
 make fw fw-release size-check static-analysis   # firmware builds, memory budgets, no heap, cppcheck
 make test-renode      # platform gates + every tests/robot/*.robot suite on Renode
 make demo             # scripted end-to-end demo with a live dashboard (~35 s)
-make bench-emu soak   # benchmarks -> bench/results, docs/results.md
+make bench-emu soak   # benchmarks -> bench/results (bench-all: every bench, ~45 min)
+make results          # docs/results.md and the docs/img charts from bench/results (no Renode)
 make ci-docker        # the Linux CI path in ubuntu:24.04 via Docker
 ```
 
@@ -58,6 +59,7 @@ Python oracle, sample by sample.
 | FI-03 / FI-04 / roc | RANGE, STUCK onset (sample 449), ROC flags on exactly the expected samples | pass |
 | FI-05 | 1000 malformed frames: `rx_frames_bad` = 800 and 200 error ACKs exactly, then PING OK, no reset | pass |
 | FI-06 | Hung `cmd_task` → IWDG reset, BOOT reason WDT_TASK_STALL naming `cmd`, samples again ≤ 2 s | pass |
+| FI-06b | Same hang, armed so the reset lands mid-scan (D16): the stalled scan is aborted, ≤ 3 overruns, exact conservation | pass |
 | FI-07 | `UDF` → HardFault, BOOT PC equals the `fi_udf_site` symbol, CFSR = UNDEFINSTR | pass |
 | FI-08 | Stack overflow in the sacrificial `fi` task → reason STACK_OVF, task `fi` | pass |
 | FI-09 | `configASSERT` → reason ASSERT, file and line match the source | pass |
@@ -66,6 +68,10 @@ Python oracle, sample by sample.
 | FI-13 | IMU data stops | **not applicable**: polled design (D11), no DRDY to lose |
 | IT-STRESS-1 | 8 kHz + repeated stalls + slow link + uplink spam, 60 s virtual: no reset, exact conservation, every stack ≥ 25 % free | pass |
 | IT-RELEASE-1 | Release build: FI_ARM → UNSUPPORTED, BOOT shows release and no fault injection | pass |
+
+## Repeatability
+
+The Renode suite passed 20 of 20 consecutive runs (P-16), and a second benchmark run reproduced every `[EMU]` value exactly. Details in `docs/progress.md`.
 
 ## Emulator caveats that shape the tests
 

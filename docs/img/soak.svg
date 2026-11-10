@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="300" viewBox="0 0 720 300" role="img" aria-labelledby="t d" font-family='-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif'>
+<title id="t">30-minute soak at 1 kHz</title><desc id="d">Per-minute delivered rate, ring high-water mark and smallest stack headroom over a 30-minute virtual soak: all flat, no resets, no drops.</desc>
+<style>.bg{fill:#fcfcfb;stroke:rgba(11,11,11,0.10)}.t1{fill:#0b0b0b}.t2{fill:#52514e}.t3{fill:#6f6d68}.grid{stroke:#e1e0d9}.axis{stroke:#c3c2b7}.ref{stroke:#52514e}.s1{fill:#2a78d6}.ks1{stroke:#2a78d6}.ws1{fill:#2a78d6;fill-opacity:.16}.s2{fill:#eb6834}.ks2{stroke:#eb6834}.ws2{fill:#eb6834;fill-opacity:.16}.s3{fill:#1baf7a}.ks3{stroke:#1baf7a}.ws3{fill:#1baf7a;fill-opacity:.16}.s4{fill:#eda100}.ks4{stroke:#eda100}.ws4{fill:#eda100;fill-opacity:.16}.wn{fill:#0b0b0b;fill-opacity:.05}.ring{stroke:#fcfcfb}@media (prefers-color-scheme:dark){.bg{fill:#1a1a19;stroke:rgba(255,255,255,0.10)}.t1{fill:#f0efec}.t2{fill:#c3c2b7}.t3{fill:#a3a29b}.grid{stroke:#2c2c2a}.axis{stroke:#383835}.ref{stroke:#c3c2b7}.s1{fill:#3987e5}.ks1{stroke:#3987e5}.ws1{fill:#3987e5;fill-opacity:.16}.s2{fill:#d95926}.ks2{stroke:#d95926}.ws2{fill:#d95926;fill-opacity:.16}.s3{fill:#199e70}.ks3{stroke:#199e70}.ws3{fill:#199e70;fill-opacity:.16}.s4{fill:#c98500}.ks4{stroke:#c98500}.ws4{fill:#c98500;fill-opacity:.16}.wn{fill:#ffffff;fill-opacity:.05}.ring{stroke:#1a1a19}}</style>
+<rect x="0.5" y="0.5" width="719.0" height="299.0" rx="8" class="bg"/>
+<text x="24.0" y="34.0" class="t1" font-size="15" text-anchor="start" font-weight="600">30-minute soak at 1 kHz</text>
+<text x="24.0" y="54.0" class="t2" font-size="12" text-anchor="start" font-weight="400">B-07 · 1,801,802 samples, 1 boot, 0 rejects, 0 drops · [EMU] Renode virtual time, not hardware · 40008df3</text>
+<text x="24.0" y="96.0" class="t1" font-size="12" text-anchor="start" font-weight="600">Delivered samples/s</text>
+<line x1="24.0" y1="250.0" x2="220.0" y2="250.0" class="axis" stroke-width="1"/>
+<line x1="24.0" y1="120.0" x2="220.0" y2="120.0" class="grid" stroke-width="1"/>
+<text x="220.0" y="114.0" class="t3" font-size="11" text-anchor="end" font-weight="400">1200</text>
+<path d="M37.1,141.6L43.6,141.6L50.1,141.6L56.7,141.6L63.2,141.6L69.7,141.6L76.3,141.6L82.8,141.6L89.3,141.6L95.9,141.6L102.4,141.6L108.9,141.6L115.5,141.6L122.0,141.6L128.5,141.6L135.1,141.6L141.6,141.6L148.1,141.6L154.7,141.6L161.2,141.6L167.7,141.6L174.3,141.6L180.8,141.6L187.3,141.6L193.9,141.6L200.4,141.6L206.9,141.6L213.5,141.6L220.0,141.6" class="ks1" fill="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="220.0" cy="141.6" r="4" class="s1 ring" stroke-width="2"/>
+<text x="218.0" y="131.6" class="t1" font-size="11" text-anchor="end" font-weight="600">1,001</text>
+<text x="24.0" y="268.0" class="t3" font-size="11" text-anchor="start" font-weight="400">0</text>
+<text x="220.0" y="268.0" class="t3" font-size="11" text-anchor="end" font-weight="400">30 min</text>
+<text x="254.0" y="96.0" class="t1" font-size="12" text-anchor="start" font-weight="600">Ring high-water mark (of 128)</text>
+<line x1="254.0" y1="250.0" x2="450.0" y2="250.0" class="axis" stroke-width="1"/>
+<line x1="254.0" y1="120.0" x2="450.0" y2="120.0" class="grid" stroke-width="1"/>
+<text x="450.0" y="114.0" class="t3" font-size="11" text-anchor="end" font-weight="400">128</text>
+<path d="M260.5,249.0L267.1,249.0L273.6,249.0L280.1,249.0L286.7,249.0L293.2,249.0L299.7,249.0L306.3,249.0L312.8,249.0L319.3,249.0L325.9,249.0L332.4,249.0L338.9,249.0L345.5,249.0L352.0,249.0L358.5,249.0L365.1,249.0L371.6,249.0L378.1,249.0L384.7,249.0L391.2,249.0L397.7,249.0L404.3,249.0L410.8,249.0L417.3,249.0L423.9,249.0L430.4,249.0L436.9,249.0L443.5,249.0L450.0,249.0" class="ks1" fill="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="450.0" cy="249.0" r="4" class="s1 ring" stroke-width="2"/>
+<text x="448.0" y="239.0" class="t1" font-size="11" text-anchor="end" font-weight="600">1</text>
+<text x="254.0" y="268.0" class="t3" font-size="11" text-anchor="start" font-weight="400">0</text>
+<text x="450.0" y="268.0" class="t3" font-size="11" text-anchor="end" font-weight="400">30 min</text>
+<text x="484.0" y="96.0" class="t1" font-size="12" text-anchor="start" font-weight="600">Smallest stack headroom (%)</text>
+<line x1="484.0" y1="250.0" x2="680.0" y2="250.0" class="axis" stroke-width="1"/>
+<line x1="484.0" y1="120.0" x2="680.0" y2="120.0" class="grid" stroke-width="1"/>
+<text x="680.0" y="114.0" class="t3" font-size="11" text-anchor="end" font-weight="400">100</text>
+<path d="M490.5,165.8L497.1,166.4L503.6,166.4L510.1,166.4L516.7,166.4L523.2,166.4L529.7,166.4L536.3,166.4L542.8,166.4L549.3,166.4L555.9,166.4L562.4,166.4L568.9,166.4L575.5,166.4L582.0,166.4L588.5,166.4L595.1,166.4L601.6,166.4L608.1,166.4L614.7,166.4L621.2,166.4L627.7,166.4L634.3,166.4L640.8,166.4L647.3,166.4L653.9,166.4L660.4,166.4L666.9,166.4L673.5,166.4L680.0,166.4" class="ks1" fill="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="680.0" cy="166.4" r="4" class="s1 ring" stroke-width="2"/>
+<text x="678.0" y="156.4" class="t1" font-size="11" text-anchor="end" font-weight="600">64</text>
+<text x="484.0" y="268.0" class="t3" font-size="11" text-anchor="start" font-weight="400">0</text>
+<text x="680.0" y="268.0" class="t3" font-size="11" text-anchor="end" font-weight="400">30 min</text>
+</svg>

@@ -46,6 +46,8 @@ cd tools && python -m telemetry decode --serial /dev/cu.usbserial-XXXX --baud 92
 | B-05 real 115200-baud link | — | Renode UART has no baud timing (D1) |
 | B-06 sampling jitter histogram (P-05 ≤ 5 µs), P-06 DMA ISR ≤ 3 µs, P-07 CPU ≤ 10 % | P-05..P-07 | Timing |
 | B-07 24 h soak | P-10 | Board |
+| B-11 recovery times on silicon (P-13 ≤ 2 s, P-14 boot to first batch ≤ 100 ms) | P-13, P-14 | `[EMU]` times are virtual; IWDG and boot timing differ on silicon |
+| Check whether the mid-scan reset stall (D16) occurs on silicon | D16 | Renode-only state; the 2 ms scan abort stays as the ADC OVR recovery either way |
 | IMU on the DRDY interrupt (PRD design) instead of polling | §10.3 | D11 forced polling; EXTI wiring untested |
 | I²C bus-recovery and unplug test (FI-12 by unplugging) | FI-12 | Physical bus |
 | Bus fault from a wild pointer; DMA into CCM failing on silicon | D4, D5 | Renode does not fault |

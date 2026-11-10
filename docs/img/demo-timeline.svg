@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="396" viewBox="0 0 720 396" role="img" aria-labelledby="t d" font-family='-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif'>
+<title id="t">The make demo scenario, second by second</title><desc id="d">Per-second delivered and dropped samples through the demo: 1 kHz, 2 kHz, FI-01 stall (ring drops), FI-02 slow link (pool drops), FI-06 hang and watchdog reset, stop.</desc>
+<style>.bg{fill:#fcfcfb;stroke:rgba(11,11,11,0.10)}.t1{fill:#0b0b0b}.t2{fill:#52514e}.t3{fill:#6f6d68}.grid{stroke:#e1e0d9}.axis{stroke:#c3c2b7}.ref{stroke:#52514e}.s1{fill:#2a78d6}.ks1{stroke:#2a78d6}.ws1{fill:#2a78d6;fill-opacity:.16}.s2{fill:#eb6834}.ks2{stroke:#eb6834}.ws2{fill:#eb6834;fill-opacity:.16}.s3{fill:#1baf7a}.ks3{stroke:#1baf7a}.ws3{fill:#1baf7a;fill-opacity:.16}.s4{fill:#eda100}.ks4{stroke:#eda100}.ws4{fill:#eda100;fill-opacity:.16}.wn{fill:#0b0b0b;fill-opacity:.05}.ring{stroke:#fcfcfb}@media (prefers-color-scheme:dark){.bg{fill:#1a1a19;stroke:rgba(255,255,255,0.10)}.t1{fill:#f0efec}.t2{fill:#c3c2b7}.t3{fill:#a3a29b}.grid{stroke:#2c2c2a}.axis{stroke:#383835}.ref{stroke:#c3c2b7}.s1{fill:#3987e5}.ks1{stroke:#3987e5}.ws1{fill:#3987e5;fill-opacity:.16}.s2{fill:#d95926}.ks2{stroke:#d95926}.ws2{fill:#d95926;fill-opacity:.16}.s3{fill:#199e70}.ks3{stroke:#199e70}.ws3{fill:#199e70;fill-opacity:.16}.s4{fill:#c98500}.ks4{stroke:#c98500}.ws4{fill:#c98500;fill-opacity:.16}.wn{fill:#ffffff;fill-opacity:.05}.ring{stroke:#1a1a19}}</style>
+<rect x="0.5" y="0.5" width="719.0" height="395.0" rx="8" class="bg"/>
+<text x="24.0" y="34.0" class="t1" font-size="15" text-anchor="start" font-weight="600">The make demo scenario, second by second</text>
+<text x="24.0" y="54.0" class="t2" font-size="12" text-anchor="start" font-weight="400">B-12 · samples per second by outcome; counters from HEALTH frames · [EMU] Renode virtual time, not hardware · 40008df3</text>
+<rect x="24.0" y="71.0" width="10.0" height="10.0" rx="2" class="s1"/>
+<text x="39.0" y="80.0" class="t2" font-size="12" text-anchor="start" font-weight="400">delivered</text>
+<rect x="109.4" y="71.0" width="10.0" height="10.0" rx="2" class="s2"/>
+<text x="124.4" y="80.0" class="t2" font-size="12" text-anchor="start" font-weight="400">overrun</text>
+<rect x="181.6" y="71.0" width="10.0" height="10.0" rx="2" class="s3"/>
+<text x="196.6" y="80.0" class="t2" font-size="12" text-anchor="start" font-weight="400">dropped at ring</text>
+<rect x="306.6" y="71.0" width="10.0" height="10.0" rx="2" class="s4"/>
+<text x="321.6" y="80.0" class="t2" font-size="12" text-anchor="start" font-weight="400">dropped at pool</text>
+<line x1="76.0" y1="316.0" x2="696.0" y2="316.0" class="axis" stroke-width="1"/>
+<text x="68.0" y="320.0" class="t3" font-size="11" text-anchor="end" font-weight="400">0</text>
+<line x1="76.0" y1="254.7" x2="696.0" y2="254.7" class="grid" stroke-width="1"/>
+<text x="68.0" y="258.7" class="t3" font-size="11" text-anchor="end" font-weight="400">1,000</text>
+<line x1="76.0" y1="193.3" x2="696.0" y2="193.3" class="grid" stroke-width="1"/>
+<text x="68.0" y="197.3" class="t3" font-size="11" text-anchor="end" font-weight="400">2,000</text>
+<line x1="76.0" y1="132.0" x2="696.0" y2="132.0" class="grid" stroke-width="1"/>
+<text x="68.0" y="136.0" class="t3" font-size="11" text-anchor="end" font-weight="400">3,000 /s</text>
+<path d="M77.5,316.0V258.7Q77.5,254.7 81.5,254.7H91.2Q95.2,254.7 95.2,258.7V316.0Z" class="s1"/>
+<path d="M98.2,316.0V258.7Q98.2,254.7 102.2,254.7H111.8Q115.8,254.7 115.8,258.7V316.0Z" class="s1"/>
+<path d="M118.8,316.0V258.7Q118.8,254.7 122.8,254.7H132.5Q136.5,254.7 136.5,258.7V316.0Z" class="s1"/>
+<path d="M139.5,316.0V258.7Q139.5,254.7 143.5,254.7H153.2Q157.2,254.7 157.2,258.7V316.0Z" class="s1"/>
+<path d="M160.2,316.0V258.7Q160.2,254.7 164.2,254.7H173.8Q177.8,254.7 177.8,258.7V316.0Z" class="s1"/>
+<path d="M180.8,316.0V258.7Q180.8,254.7 184.8,254.7H194.5Q198.5,254.7 198.5,258.7V316.0Z" class="s1"/>
+<path d="M201.5,316.0V258.7Q201.5,254.7 205.5,254.7H215.2Q219.2,254.7 219.2,258.7V316.0Z" class="s1"/>
+<path d="M222.2,316.0V258.7Q222.2,254.7 226.2,254.7H235.8Q239.8,254.7 239.8,258.7V316.0Z" class="s1"/>
+<path d="M242.8,316.0V258.7Q242.8,254.7 246.8,254.7H256.5Q260.5,254.7 260.5,258.7V316.0Z" class="s1"/>
+<path d="M263.5,316.0V258.7Q263.5,254.7 267.5,254.7H277.2Q281.2,254.7 281.2,258.7V316.0Z" class="s1"/>
+<path d="M284.2,316.0V196.7Q284.2,192.7 288.2,192.7H297.8Q301.8,192.7 301.8,196.7V316.0Z" class="s1"/>
+<path d="M304.8,316.0V197.3Q304.8,193.3 308.8,193.3H318.5Q322.5,193.3 322.5,197.3V316.0Z" class="s1"/>
+<path d="M325.5,316.0V196.7Q325.5,192.7 329.5,192.7H339.2Q343.2,192.7 343.2,196.7V316.0Z" class="s1"/>
+<path d="M346.2,316.0V197.3Q346.2,193.3 350.2,193.3H359.8Q363.8,193.3 363.8,197.3V316.0Z" class="s1"/>
+<path d="M366.8,316.0V228.3Q366.8,228.3 366.8,228.3H384.5Q384.5,228.3 384.5,228.3V316.0Z" class="s1"/>
+<path d="M366.8,226.3V199.3Q366.8,199.3 366.8,199.3H384.5Q384.5,199.3 384.5,199.3V226.3Z" class="s3"/>
+<path d="M366.8,197.3V195.4Q366.8,193.4 368.8,193.4H382.5Q384.5,193.4 384.5,195.4V197.3Z" class="s4"/>
+<path d="M387.5,316.0V196.7Q387.5,192.7 391.5,192.7H401.2Q405.2,192.7 405.2,196.7V316.0Z" class="s1"/>
+<path d="M408.2,316.0V197.3Q408.2,193.3 412.2,193.3H421.8Q425.8,193.3 425.8,197.3V316.0Z" class="s1"/>
+<path d="M428.8,316.0V279.6Q428.8,279.6 428.8,279.6H529.2Q529.2,279.6 529.2,279.6V316.0Z" class="s1"/>
+<path d="M428.8,277.6V197.1Q428.8,193.1 432.8,193.1H525.2Q529.2,193.1 529.2,197.1V277.6Z" class="s4"/>
+<path d="M532.2,316.0V196.7Q532.2,192.7 536.2,192.7H545.8Q549.8,192.7 549.8,196.7V316.0Z" class="s1"/>
+<path d="M552.8,316.0V197.3Q552.8,193.3 556.8,193.3H566.5Q570.5,193.3 570.5,197.3V316.0Z" class="s1"/>
+<path d="M594.1,316.0V258.7Q594.1,254.7 598.1,254.7H607.8Q611.8,254.7 611.8,258.7V316.0Z" class="s1"/>
+<path d="M614.8,316.0V258.7Q614.8,254.7 618.8,254.7H628.5Q632.5,254.7 632.5,258.7V316.0Z" class="s1"/>
+<path d="M635.5,316.0V258.7Q635.5,254.7 639.5,254.7H649.1Q653.1,254.7 653.1,258.7V316.0Z" class="s1"/>
+<line x1="282.7" y1="110.0" x2="282.7" y2="316.0" class="ref" stroke-width="1" stroke-opacity=".45"/>
+<text x="286.7" y="118.0" class="t1" font-size="11" text-anchor="start" font-weight="600">2 kHz</text>
+<line x1="365.3" y1="110.0" x2="365.3" y2="316.0" class="ref" stroke-width="1" stroke-opacity=".45"/>
+<text x="369.3" y="118.0" class="t1" font-size="11" text-anchor="start" font-weight="600">FI-01</text>
+<line x1="427.3" y1="110.0" x2="427.3" y2="316.0" class="ref" stroke-width="1" stroke-opacity=".45"/>
+<text x="431.3" y="118.0" class="t1" font-size="11" text-anchor="start" font-weight="600">FI-02</text>
+<line x1="510.0" y1="110.0" x2="510.0" y2="316.0" class="ref" stroke-width="1" stroke-opacity=".45"/>
+<text x="514.0" y="118.0" class="t1" font-size="11" text-anchor="start" font-weight="600">link ok</text>
+<line x1="572.0" y1="110.0" x2="572.0" y2="316.0" class="ref" stroke-width="1" stroke-opacity=".45"/>
+<text x="576.0" y="118.0" class="t1" font-size="11" text-anchor="start" font-weight="600">FI-06</text>
+<line x1="592.6" y1="110.0" x2="592.6" y2="316.0" class="ref" stroke-width="1" stroke-opacity=".45"/>
+<text x="596.6" y="130.0" class="t1" font-size="11" text-anchor="start" font-weight="600">watchdog reset</text>
+<line x1="654.7" y1="110.0" x2="654.7" y2="316.0" class="ref" stroke-width="1" stroke-opacity=".45"/>
+<text x="658.7" y="118.0" class="t1" font-size="11" text-anchor="start" font-weight="600">stop</text>
+<text x="76.0" y="334.0" class="t3" font-size="11" text-anchor="middle" font-weight="400">0</text>
+<text x="179.3" y="334.0" class="t3" font-size="11" text-anchor="middle" font-weight="400">5</text>
+<text x="282.7" y="334.0" class="t3" font-size="11" text-anchor="middle" font-weight="400">10</text>
+<text x="386.0" y="334.0" class="t3" font-size="11" text-anchor="middle" font-weight="400">15</text>
+<text x="489.3" y="334.0" class="t3" font-size="11" text-anchor="middle" font-weight="400">20</text>
+<text x="592.7" y="334.0" class="t3" font-size="11" text-anchor="middle" font-weight="400">25</text>
+<text x="696.0" y="334.0" class="t3" font-size="11" text-anchor="middle" font-weight="400">30</text>
+<text x="696.0" y="352.0" class="t3" font-size="11" text-anchor="end" font-weight="400">Virtual time (s)</text>
+<text x="24.0" y="370.0" class="t2" font-size="11" text-anchor="start" font-weight="400">No HEALTH frame reached the host while the link was slow, so that span shows its average.</text>
+<text x="24.0" y="386.0" class="t2" font-size="11" text-anchor="start" font-weight="400">After the reset: 3004 triggered = 3004 delivered + 0 dropped (exact).</text>
+</svg>

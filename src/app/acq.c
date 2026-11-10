@@ -2,7 +2,10 @@
  *
  * Invariant I-ACQ-1: t_trig/cur_seq are written only by the TIM3 ISR while in_flight == 0 and
  * read only by the DMA ISR while in_flight == 1; the DMA ISR clears in_flight after reading
- * them (release). TIM3 (prio 4) may preempt the DMA ISR (prio 5); this ordering makes it safe. */
+ * them (release). TIM3 (prio 4) may preempt the DMA ISR (prio 5); this ordering makes it safe.
+ * TIM3 also aborts a scan still in flight after SCAN_TIMEOUT_US, but only while its DMA transfers
+ * are unfinished (NDTR != 0): the DMA ISR runs only after transfer complete, so it never owns
+ * a scan that TIM3 aborts. */
 #include "app.h"
 #include "drivers.h"
 #include "fault_inject.h"
@@ -34,6 +37,12 @@ void TIM3_IRQHandler(void)
     TIM3->SR = ~TIM_SR_UIF;
     mark_hi(MARK_ISR);
     uint32_t s = atomic_fetch_add_explicit(&ctr.seq, 1u, memory_order_relaxed);
+    if (atomic_load_explicit(&in_flight, memory_order_acquire) &&
+        now_us() - t_trig > SCAN_TIMEOUT_US && adc_abort_stalled_scan()) {
+        /* The stalled scan's sample is lost: count it, then start this trigger's scan. */
+        atomic_fetch_add_explicit(&ctr.dropped_overrun, 1u, memory_order_relaxed);
+        atomic_store_explicit(&in_flight, false, memory_order_relaxed);
+    }
     if (atomic_load_explicit(&in_flight, memory_order_acquire)) {
         atomic_fetch_add_explicit(&ctr.dropped_overrun, 1u, memory_order_relaxed);
     } else {

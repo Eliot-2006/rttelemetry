@@ -3,6 +3,9 @@
 
     python bench/bench.py [--only B-01,B-09] [--sweep-seconds 60] [--soak-seconds 1800]
 
+B-10 (ring overflow and drain), B-11 (fault recovery, P-13/P-14) and B-12 (the `make demo` scenario)
+are additions to the PRD list.
+
 Each benchmark writes bench/results/<env>/<YYYYMMDD>-<shortsha>-<bench>.json (PRD §20.3) with
 the environment, firmware configuration, raw data and summary. [EMU] values come from Renode
 virtual time and are deterministic per commit; they are NOT hardware measurements.
@@ -71,11 +74,16 @@ def cmd_bytes(name, seq, *args):
     return list(encode_command(name, seq, *args))
 
 
-def run_emu(steps, scenario="nominal"):
-    """steps: ("run", seconds) | ("cmd", name, *args). Returns the raw USART2 capture."""
+def run_emu(steps, scenario="nominal", resets=None):
+    """steps: ("run", seconds) | ("cmd", name, *args). Returns the raw USART2 capture.
+    resets: a list that receives the Renode virtual time (us) of every watchdog/software reset."""
     with tempfile.TemporaryDirectory() as d:
-        cap, resc = pathlib.Path(d) / "uart.bin", pathlib.Path(d) / "run.resc"
+        cap, resc, vt = (pathlib.Path(d) / n for n in ("uart.bin", "run.resc", "resets.txt"))
         lines = [f"$elf=@{ELF}", f"include @{ROOT}/renode/telemetry.resc"]
+        if resets is not None:  # same reset macro as telemetry.resc, plus a virtual-time log line
+            lines += ['macro reset', '"""', '    sysbus LoadELF $elf',
+                      f"    python \"open('{vt}', 'a').write(str(monitor.Machine.ElapsedVirtualTime"
+                      ".TimeElapsed.TotalMicroseconds) + chr(10))\"", '"""']
         lines += [f"sysbus.adc1 FeedSample @{ROOT}/renode/data/{scenario}/ch{c}.dat {c} -1" for c in (1, 8, 16, 17)]
         lines += ["sysbus.i2c1.imu FeedAccelerationSample 0.5 -0.25 1.0 1000000",
                   "sysbus.i2c1.imu FeedAngularRateSample 10 -20 250 1000000",
@@ -95,6 +103,8 @@ def run_emu(steps, scenario="nominal"):
                            capture_output=True, text=True, timeout=7200)
         if r.returncode:
             sys.exit(f"Renode exited {r.returncode}:\n" + "\n".join((r.stdout + r.stderr).splitlines()[-30:]))
+        if resets is not None and vt.exists():
+            resets += [float(x) for x in vt.read_text().split()]
         return cap.read_bytes()
 
 
@@ -186,8 +196,10 @@ def b01_b02_b04_b08(sweep_s):
     raw, frames, s = one_khz
     stop_us = (0.1 + sweep_s) * 1e6  # exclude the final stop-and-flush partial batch (20 ms flush)
     l1 = [d for d, t in s["_l1"] if t < stop_us - 50_000]
+    hist = Counter(d // 250 for d in l1)
     save("B-02", "emu", {"rate_hz": 1000, "seconds": sweep_s, "samples": len(l1),
                          "l1_us": {"p50": pct(l1, 50), "p90": pct(l1, 90), "p99": pct(l1, 99), "max": max(l1)},
+                         "l1_hist": {"bin_us": 250, "counts": [hist[i] for i in range(max(hist) + 1)]},
                          "l1_definition": "SAMPLE_BATCH frame t_us (handed to TX) minus sample t_us (trigger), "
                                           "per sample, steady state (excludes the final stop-and-flush batch)",
                          "l2_max_us_device": s["l2_max_us_device"],
@@ -249,7 +261,99 @@ def b07(seconds):
     frames, s = summarize_run(raw, stop_us=seconds * 1e6)
     s.pop("_l1")
     s["samples_received"] = s.pop("_samples")
-    save("B-07", "emu", {"rate_hz": 1000, "seconds_virtual": seconds, **s})
+    health = [f["payload"] for f in frames if f["name"] == "HEALTH"]
+    series = [{"t_s": round(h["uptime_ms"] / 1000), "delivered": h["delivered"], "ring_hwm": h["ring_hwm"],
+               "txpool_free_min": h["txpool_free_min"],
+               "stack_free_min_pct": round(min(100 * f / w for f, w in zip(h["stack_free_min_words"],
+                                                                           STACK_WORDS.values())), 1),
+               "cpu_load_permille": h["cpu_load_permille"], "l1_max_us": h["l1_max_us"]}
+              for h in health[59::60]]  # one HEALTH per virtual minute
+    save("B-07", "emu", {"rate_hz": 1000, "seconds_virtual": seconds, **s, "per_minute": series})
+
+
+def b10(stall_ms=300, t_arm=1.0):
+    """FI-01 at 1 kHz: proc_task stalls, the 128-slot ring fills, the newest samples drop, then it drains."""
+    raw = run_emu([("run", t_arm), ("cmd", "fi-arm", 1, stall_ms), ("run", 1.5)] + STOP_FLUSH)
+    frames, s = summarize_run(raw, stop_us=(t_arm + 1.5) * 1e6)
+    t0 = next(f["t_us"] for f in frames if f["name"] == "ACK")  # device time the stall was armed
+    rx = sorted((x["seq"], x["t_us"], f["t_us"]) for f in frames if f["name"] == "SAMPLE_BATCH"
+                for x in f["payload"]["samples"])
+    gaps = [{"first_seq": a[0] + 1, "last_seq": b[0] - 1, "after_ms": round((a[1] - t0) / 1000, 3),
+             "before_ms": round((b[1] - t0) / 1000, 3)} for a, b in zip(rx, rx[1:]) if b[0] - a[0] > 1]
+    win = [((t - t0) / 1000, (ft - t) / 1000) for _, t, ft in rx if -200_000 <= t - t0 <= 800_000]
+    steady = max(l1 for t, l1 in win if t < -50)  # samples queued just before t0 already wait out the stall
+    after = [t for t, l1 in win if gaps and t > gaps[-1]["before_ms"] - 0.001 and l1 <= steady]
+    save("B-10", "emu", {
+        "rate_hz": 1000, "stall_ms": stall_ms, "ring_capacity": 128, "pool_frames": 4,
+        "dropped_ring": s["dropped_ring"], "dropped_txpool": s["dropped_txpool"],
+        "dropped_overrun": s["dropped_overrun"],
+        "seq_gap_total": sum(g["last_seq"] - g["first_seq"] + 1 for g in gaps), "gaps": gaps,
+        "calc_expected_ring_drops": "stall / sample period - ring capacity = 300 / 0.999 - 128 = 172",
+        "steady_l1_max_ms": round(steady, 3), "peak_l1_ms": round(max(l1 for _, l1 in win), 3),
+        "back_to_steady_l1_at_ms": round(after[0], 3) if after else None,
+        "conservation": s["conservation"], "rejects": s["rejects"],
+        "series": {"t_ms": [round(t, 3) for t, _ in win], "l1_ms": [round(l1, 3) for _, l1 in win]}})
+
+
+B11_FAULTS = [("FI-06", "cmd_task hangs", 3, 2), ("FI-07", "UDF: HardFault", 4, 0),
+              ("FI-08", "stack overflow", 5, 0), ("FI-09", "configASSERT", 6, 0)]
+
+
+def b11(t_arm=1.0):
+    """P-13 recovery time and P-14 boot time. Reset instants come from Renode's virtual clock."""
+    from telemetry.frames import RESET_REASONS
+    rows, power_on_ms = [], None
+    for fid, what, code, arg in B11_FAULTS:
+        resets = []
+        raw = run_emu([("run", t_arm), ("cmd", "fi-arm", code, arg), ("run", 3.0)] + STOP_FLUSH, resets=resets)
+        frames, s = summarize_run(raw)
+        boots = [i for i, f in enumerate(frames) if f["name"] == "BOOT"]
+        first = [next(f["t_us"] for f in frames[i:] if f["name"] == "SAMPLE_BATCH") / 1000 for i in boots]
+        b = frames[boots[1]]["payload"]
+        reset_ms = (resets[0] - t_arm * 1e6) / 1000
+        power_on_ms = first[0]
+        rows.append({"fault": fid, "injected": what, "reason": RESET_REASONS[b["reset_reason"]],
+                     "task": b["task"], "reset_after_ms": round(reset_ms, 3),
+                     "boot_to_first_batch_ms": first[1], "recovery_ms": round(reset_ms + first[1], 3),
+                     "boots": s["boots"], "dropped_overrun": s["dropped_overrun"],
+                     "conservation_after_reset": s["conservation"]["ok"]})
+    save("B-11", "emu", {"armed_at_s": t_arm, "rows": rows, "power_on_to_first_batch_ms": power_on_ms,
+                         "target_p13_ms": 2000, "target_p14_ms": 100,
+                         "note": "reset_after_ms runs from the FI_ARM command entering USART2 to the reset, on "
+                                 "Renode's virtual clock. boot_to_first_batch_ms is the first SAMPLE_BATCH "
+                                 "frame's device timestamp, so it excludes the startup code before TIM2 starts"})
+
+
+def b12():
+    """The `make demo` scenario (tools/telemetry/demo.py SCRIPT), HEALTH by HEALTH across the reset."""
+    from telemetry.demo import SCRIPT, TAIL_S
+    from telemetry.events import name as event_name
+    steps, script, t = [], [], 0.0
+    for secs, cmd, args, note in SCRIPT:
+        steps += [("run", secs), ("cmd", cmd, *args)]
+        t += secs
+        script.append({"t_s": t, "cmd": cmd, "args": list(args), "note": note})
+    resets = []
+    raw = run_emu(steps + [("run", TAIL_S)], resets=resets)
+    frames, s = summarize_run(raw)
+    t0 = [0.0] + [r / 1e6 for r in resets]  # virtual time each boot started (boot 0: power-on)
+    keys = ("sample_rate_hz", "triggered", "delivered", "dropped_overrun", "dropped_ring", "dropped_txpool",
+            "ring_occ", "ring_hwm", "txpool_free_min", "cpu_load_permille")
+    boot, health, events = -1, [], []
+    for f in frames:
+        if f["name"] == "BOOT":
+            boot += 1
+        elif f["name"] == "HEALTH":
+            h = f["payload"]
+            health.append({"boot": boot, "t_s": round(t0[boot] + h["uptime_ms"] / 1000, 3),
+                           **{k: h[k] for k in keys}})
+        elif f["name"] == "EVENT":
+            events += [{"boot": boot, "t_s": round(t0[boot] + e["t_us"] / 1e6, 4), "id": e["id"],
+                        "name": event_name(e["id"]), "arg": e["arg"]} for e in f["payload"]["events"]]
+    boots = [{"t_s": round(t0[i], 4), "reason": f["payload"]["reset_reason"], "task": f["payload"]["task"]}
+             for i, f in enumerate(x for x in frames if x["name"] == "BOOT")]
+    save("B-12", "emu", {"script": script, "boots": boots, "health": health, "events": events,
+                         "rejects": s["rejects"], "conservation_last_boot": s["conservation"]})
 
 
 def b09(trials=100_000, seed=1):
@@ -288,7 +392,7 @@ def b09(trials=100_000, seed=1):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--only", default="B-01,B-05,B-07,B-09")
+    ap.add_argument("--only", default="B-01,B-05,B-09,B-10,B-11,B-12,B-07")
     ap.add_argument("--sweep-seconds", type=float, default=60)
     ap.add_argument("--b05-seconds", type=float, default=30)
     ap.add_argument("--soak-seconds", type=float, default=1800)
@@ -300,6 +404,12 @@ def main():
         b05(a.b05_seconds)
     if "B-09" in only:
         b09()
+    if "B-10" in only:
+        b10()
+    if "B-11" in only:
+        b11()
+    if "B-12" in only:
+        b12()
     if "B-07" in only:
         b07(a.soak_seconds)
 

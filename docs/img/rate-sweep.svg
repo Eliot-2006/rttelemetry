@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="352" viewBox="0 0 720 352" role="img" aria-labelledby="t d" font-family='-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif'>
+<title id="t">Sampling rate vs. loss</title><desc id="d">Delivered and overrun samples per second at each requested rate. Zero loss up to 2000 Hz; at 4 and 8 kHz the emulated ADC (400 us per scan, D13) overruns, and every lost sample is counted.</desc>
+<style>.bg{fill:#fcfcfb;stroke:rgba(11,11,11,0.10)}.t1{fill:#0b0b0b}.t2{fill:#52514e}.t3{fill:#6f6d68}.grid{stroke:#e1e0d9}.axis{stroke:#c3c2b7}.ref{stroke:#52514e}.s1{fill:#2a78d6}.ks1{stroke:#2a78d6}.ws1{fill:#2a78d6;fill-opacity:.16}.s2{fill:#eb6834}.ks2{stroke:#eb6834}.ws2{fill:#eb6834;fill-opacity:.16}.s3{fill:#1baf7a}.ks3{stroke:#1baf7a}.ws3{fill:#1baf7a;fill-opacity:.16}.s4{fill:#eda100}.ks4{stroke:#eda100}.ws4{fill:#eda100;fill-opacity:.16}.wn{fill:#0b0b0b;fill-opacity:.05}.ring{stroke:#fcfcfb}@media (prefers-color-scheme:dark){.bg{fill:#1a1a19;stroke:rgba(255,255,255,0.10)}.t1{fill:#f0efec}.t2{fill:#c3c2b7}.t3{fill:#a3a29b}.grid{stroke:#2c2c2a}.axis{stroke:#383835}.ref{stroke:#c3c2b7}.s1{fill:#3987e5}.ks1{stroke:#3987e5}.ws1{fill:#3987e5;fill-opacity:.16}.s2{fill:#d95926}.ks2{stroke:#d95926}.ws2{fill:#d95926;fill-opacity:.16}.s3{fill:#199e70}.ks3{stroke:#199e70}.ws3{fill:#199e70;fill-opacity:.16}.s4{fill:#c98500}.ks4{stroke:#c98500}.ws4{fill:#c98500;fill-opacity:.16}.wn{fill:#ffffff;fill-opacity:.05}.ring{stroke:#1a1a19}}</style>
+<rect x="0.5" y="0.5" width="719.0" height="351.0" rx="8" class="bg"/>
+<text x="24.0" y="34.0" class="t1" font-size="15" text-anchor="start" font-weight="600">Sampling rate vs. loss</text>
+<text x="24.0" y="54.0" class="t2" font-size="12" text-anchor="start" font-weight="400">B-01, 60 s per rate · [EMU] Renode virtual time, not hardware · 40008df3</text>
+<rect x="24.0" y="71.0" width="10.0" height="10.0" rx="2" class="s1"/>
+<text x="39.0" y="80.0" class="t2" font-size="12" text-anchor="start" font-weight="400">delivered</text>
+<rect x="109.4" y="71.0" width="10.0" height="10.0" rx="2" class="s2"/>
+<text x="124.4" y="80.0" class="t2" font-size="12" text-anchor="start" font-weight="400">ADC overrun (counted)</text>
+<line x1="76.0" y1="296.0" x2="696.0" y2="296.0" class="axis" stroke-width="1"/>
+<text x="68.0" y="300.0" class="t3" font-size="11" text-anchor="end" font-weight="400">0</text>
+<line x1="76.0" y1="254.0" x2="696.0" y2="254.0" class="grid" stroke-width="1"/>
+<text x="68.0" y="258.0" class="t3" font-size="11" text-anchor="end" font-weight="400">2,500</text>
+<line x1="76.0" y1="212.0" x2="696.0" y2="212.0" class="grid" stroke-width="1"/>
+<text x="68.0" y="216.0" class="t3" font-size="11" text-anchor="end" font-weight="400">5,000</text>
+<line x1="76.0" y1="170.0" x2="696.0" y2="170.0" class="grid" stroke-width="1"/>
+<text x="68.0" y="174.0" class="t3" font-size="11" text-anchor="end" font-weight="400">7,500</text>
+<line x1="76.0" y1="128.0" x2="696.0" y2="128.0" class="grid" stroke-width="1"/>
+<text x="68.0" y="132.0" class="t3" font-size="11" text-anchor="end" font-weight="400">10,000</text>
+<path d="M115.7,296.0V293.9Q115.7,291.8 117.8,291.8H137.6Q139.7,291.8 139.7,293.9V296.0Z" class="s1"/>
+<text x="127.7" y="314.0" class="t2" font-size="12" text-anchor="middle" font-weight="400">250 Hz</text>
+<path d="M219.0,296.0V291.6Q219.0,287.6 223.0,287.6H239.0Q243.0,287.6 243.0,291.6V296.0Z" class="s1"/>
+<text x="231.0" y="314.0" class="t2" font-size="12" text-anchor="middle" font-weight="400">500 Hz</text>
+<path d="M322.3,296.0V283.2Q322.3,279.2 326.3,279.2H342.3Q346.3,279.2 346.3,283.2V296.0Z" class="s1"/>
+<text x="334.3" y="314.0" class="t2" font-size="12" text-anchor="middle" font-weight="400">1,000 Hz</text>
+<path d="M425.7,296.0V266.3Q425.7,262.3 429.7,262.3H445.7Q449.7,262.3 449.7,266.3V296.0Z" class="s1"/>
+<text x="437.7" y="314.0" class="t2" font-size="12" text-anchor="middle" font-weight="400">2,000 Hz</text>
+<path d="M529.0,296.0V262.2Q529.0,262.2 529.0,262.2H553.0Q553.0,262.2 553.0,262.2V296.0Z" class="s1"/>
+<path d="M529.0,260.2V232.5Q529.0,228.5 533.0,228.5H549.0Q553.0,228.5 553.0,232.5V260.2Z" class="s2"/>
+<text x="541.0" y="220.5" class="t1" font-size="11" text-anchor="middle" font-weight="600">50% delivered</text>
+<text x="541.0" y="314.0" class="t2" font-size="12" text-anchor="middle" font-weight="400">4,000 Hz</text>
+<path d="M632.3,296.0V262.1Q632.3,262.1 632.3,262.1H656.3Q656.3,262.1 656.3,262.1V296.0Z" class="s1"/>
+<path d="M632.3,260.1V164.5Q632.3,160.5 636.3,160.5H652.3Q656.3,160.5 656.3,164.5V260.1Z" class="s2"/>
+<text x="644.3" y="152.5" class="t1" font-size="11" text-anchor="middle" font-weight="600">25% delivered</text>
+<text x="644.3" y="314.0" class="t2" font-size="12" text-anchor="middle" font-weight="400">8,000 Hz</text>
+<line x1="84.0" y1="134.0" x2="481.3" y2="134.0" class="ref" stroke-width="1" stroke-opacity=".55"/>
+<text x="282.7" y="128.0" class="t1" font-size="12" text-anchor="middle" font-weight="600">zero loss up to 2,000 Hz</text>
+<text x="84.0" y="158.0" class="t2" font-size="11" text-anchor="start" font-weight="400">Renode's ADC needs 400 µs per scan (D13),</text>
+<text x="84.0" y="173.0" class="t2" font-size="11" text-anchor="start" font-weight="400">so it caps out near 2,500 samples/s.</text>
+<text x="696.0" y="332.0" class="t3" font-size="11" text-anchor="end" font-weight="400">Requested sample rate (4 channels per sample)</text>
+<text x="68.0" y="114.0" class="t3" font-size="11" text-anchor="end" font-weight="400">samples/s</text>
+</svg>

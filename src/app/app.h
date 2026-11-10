@@ -23,6 +23,7 @@
 #define BATCH_N           SAMPLE_BATCH_MAX      /* 10 samples per SAMPLE_BATCH frame */
 #define FLUSH_US          20000u                /* emit a partial batch once its oldest sample is this old */
 #define RING_CAP          128u                  /* sample records, power of two */
+#define SCAN_TIMEOUT_US   2000u                 /* abort a stalled scan (silicon ~33 us, Renode 400 us, D13) */
 #define RX_RING_CAP       512u                  /* bytes; holds two max-size wire frames */
 #define POOL_N            4u
 #define EVENT_Q_LEN       32u

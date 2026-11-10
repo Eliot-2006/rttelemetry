@@ -54,13 +54,13 @@ All kernel objects and stacks are static (`configSUPPORT_DYNAMIC_ALLOCATION 0`).
 
 | Region | Contents | Notes |
 |---|---|---|
-| FLASH | code, rodata, `.data` init | 23 KB release, 31 KB debug (`make size-check`) |
+| FLASH | code, rodata, `.data` init | 26 KB release, 35 KB debug of the 64 KiB budget (`make size-check`) |
 | SRAM1/2 | `.data`, `.bss` (TCBs, ring, pool, `scan_buf`, `tx_wire`), `.noinit` reset record | Every DMA buffer is here. `DMA_ADDR_OK()` asserts it at init (D4) |
 | CCM | `.msp` (2 KiB MSP stack at the bottom: an overflow faults instead of corrupting), task stacks | No DMA on silicon |
 
 ## Invariants
 
-- **I-ACQ-1** `t_trig`/`cur_seq` are written only by TIM3 while `in_flight == 0`, and read only by the DMA ISR while it is 1. The DMA ISR clears `in_flight` with release ordering after reading them. TIM3 at priority 4 can preempt the DMA ISR, and this ordering keeps that safe.
+- **I-ACQ-1** `t_trig`/`cur_seq` are written only by TIM3 while `in_flight == 0`, and read only by the DMA ISR while it is 1. The DMA ISR clears `in_flight` with release ordering after reading them. TIM3 at priority 4 can preempt the DMA ISR, and this ordering keeps that safe. TIM3 also aborts a scan still in flight after `SCAN_TIMEOUT_US` (2 ms), but only while its DMA transfers are unfinished (`NDTR ≠ 0`). The DMA ISR runs only after transfer complete, so it never owns a scan TIM3 aborts. The aborted sample counts as `dropped_overrun`.
 - **I-RING** The ring is SPSC with free-running u32 indices: the producer is the DMA ISR, the consumer is `proc_task`. Each index is written by one side only. Drops are counted by the producer. TSan stress test: `make test-tsan`.
 - **I-POOL-1** Each pool index is in exactly one place: `free_q`, a producer between receive and send, or `tx_q`. Both queues have depth `POOL_N`, so a send can never fail (asserted).
 - **Conservation** `triggered = delivered + dropped_overrun + dropped_ring + dropped_txpool + in_flight`. It is checked as a bound at every HEALTH frame and exactly after `SET_RATE 0` (PRD §18). Loss-accounting counters are never reset.
@@ -75,6 +75,7 @@ All kernel objects and stacks are static (`configSUPPORT_DYNAMIC_ALLOCATION 0`).
 | Stack overflow | `configCHECK_FOR_STACK_OVERFLOW 2` | The record names the task, then reset |
 | `configASSERT` | `fault_assert` | The record holds file and line, then reset |
 | Ring / pool / overrun | Counters + edge events | Degrade: drop newest, keep running |
+| ADC scan stalled (silicon: ADC OVR blocks DMA requests; Renode: D16) | TIM3 sees the scan in flight > 2 ms with DMA transfers outstanding | Abort: stream `EN` off, `ADON` cycled, `SR` cleared; count one overrun; start the next scan (FI-06b) |
 | I²C error | Two retries | Bus recovery (9 SCL clocks + peripheral reset), sensor OFFLINE, `WHO_AM_I` re-probe at 1 Hz |
 | Malformed uplink | COBS/CRC/length/args | `rx_frames_bad` or an error ACK. Never resets |
 
@@ -82,7 +83,7 @@ The reset record (magic + CRC16, `.noinit`) is reported in the BOOT frame of the
 
 ## Renode divergence register
 
-D1–D9 are from the PRD (source review). D10–D15 were found by tests in M0–M3 (evidence in
+D1–D9 are from the PRD (source review). D10–D16 were found by tests in M0–M3 and later (evidence in
 `docs/platform-verification.md` and `docs/progress.md`).
 
 | ID | Divergence (Renode 1.17.0) | Guard |
@@ -102,6 +103,7 @@ D1–D9 are from the PRD (source review). D10–D15 were found by tests in M0–
 | D13 | ADC conversion fixed at 100 µs/channel (400 µs per scan) | Emulated rates ≥ ~2.5 kHz overrun deterministically and are counted |
 | D14 | DMA stream `EN` not cleared at transfer complete | TX TC handler clears `EN` (no-op on silicon) |
 | D15 | Timer update every `ARR` ticks (silicon `ARR + 1`) | Firmware keeps the silicon-correct `ARR`; tests expect `period − 1` in EMU |
+| D16 | A watchdog reset that lands mid-scan leaves hidden ADC-to-DMA request state: registers read 0, but the first scan after boot stops after one transfer | TIM3 scan timeout aborts and re-arms the scan (also covers ADC OVR on silicon). FI-06b injects at the failing timing |
 
 ## Decisions
 

@@ -39,6 +39,9 @@ void adc_init(void);
 void adc_start_scan(volatile uint32_t *dst);
 /* ISR context (DMA2_Stream0): returns true if the scan completed (and clears the flag). */
 bool adc_dma_take_complete(void);
+/* ISR context (TIM3): if the scan's DMA transfers stopped short, abort it and re-arm the ADC
+ * (returns true). Returns false if all transfers are done: the DMA ISR owns that scan. */
+bool adc_abort_stalled_scan(void);
 
 /* ---- iwdg.c ---- */
 void iwdg_start(uint32_t timeout_ms);                 /* 1 ms resolution, max 4095 ms */
