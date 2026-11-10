@@ -35,8 +35,11 @@ static i2c_status_t start_addr(uint8_t addr8)
 
 void i2c_init(void)
 {
-    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN | RCC_AHB1ENR_GPIODEN;
     RCC->APB1ENR |= RCC_APB1ENR_I2C1EN;
+    /* STM32F4DISCOVERY: the CS43L22 codec shares I2C1; hold it in reset (PD4 low, UM1472). */
+    GPIOD->BSRR = 1u << (4 + 16);
+    gpio_mode(GPIOD, 4, GPIO_MODE_OUT, 0);
     (void)RCC->APB1ENR;
     GPIOB->OTYPER |= (1u << 8) | (1u << 9);                       /* open drain */
     GPIOB->PUPDR = (GPIOB->PUPDR & ~((3u << 16) | (3u << 18))) | (1u << 16) | (1u << 18);

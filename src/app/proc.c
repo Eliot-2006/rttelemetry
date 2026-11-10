@@ -22,9 +22,12 @@ static sample_rec_t batch[BATCH_N];
 static uint8_t batch_n;
 static uint8_t payload[FRAME_PAYLOAD_MAX];
 
+#define TXPOOL_OFF_US 100000u   /* episode ends after 100 ms without a pool drop (no event flapping) */
+
 static void emit(void)
 {
     static bool pool_empty;
+    static uint32_t episode_drops, last_drop_us;
     uint32_t now = now_us();
     size_t len = msg_put_sample_batch(payload, sizeof payload, batch, batch_n, 0x0Fu);
     configASSERT(len > 0);
@@ -33,10 +36,19 @@ static void emit(void)
         xSemaphoreTake(stats_mutex, portMAX_DELAY);
         hist_add(&l1_hist, now - batch[0].t_us);
         xSemaphoreGive(stats_mutex);
-        if (pool_empty) { pool_empty = false; log_event(EVT_TXPOOL_EMPTY_OFF, 0); }
+        if (pool_empty && now - last_drop_us >= TXPOOL_OFF_US) {
+            pool_empty = false;
+            log_event(EVT_TXPOOL_EMPTY_OFF, episode_drops);
+        }
     } else {
-        atomic_fetch_add(&ctr.dropped_txpool, batch_n);
-        if (!pool_empty) { pool_empty = true; log_event(EVT_TXPOOL_EMPTY_ON, batch[0].seq); }
+        uint32_t total = atomic_fetch_add(&ctr.dropped_txpool, batch_n) + batch_n;
+        last_drop_us = now;
+        if (!pool_empty) {
+            pool_empty = true;
+            episode_drops = 0;
+            log_event(EVT_TXPOOL_EMPTY_ON, total);
+        }
+        episode_drops += batch_n;
     }
     batch_n = 0;
 }
